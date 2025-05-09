@@ -1,5 +1,5 @@
 using UnityEngine;
 
 public class CameraListItem : MonoBehaviour {
-    public NDIViewerManager.CameraInfo cameraInfo;
+    public CameraInfo cameraInfo;
 } 

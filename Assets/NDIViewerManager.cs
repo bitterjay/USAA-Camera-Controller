@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -7,21 +8,44 @@ using Klak.Ndi;
 using UnityEditor;
 #endif
 
+[System.Serializable]
+public class CameraInfo
+{
+    public string sourceName;
+    public string niceName;
+    public NdiReceiver receiver;
+    public RawImage rawImage;
+    public GameObject tileObject;
+    public bool isActive;
+}
+
 public class NDIViewerManager : MonoBehaviour
 {
-    [System.Serializable]
-    public class CameraInfo
-    {
-        public string sourceName;
-        public string niceName;
-        public NdiReceiver receiver;
-        public RawImage rawImage;
-        public GameObject tileObject;
-    }
-
     [Header("Layout")]
     [SerializeField] private float padding = 10f;
     [SerializeField] private float aspectRatio = 16f / 9f;
+
+    [Header("Grid Layout")]
+    [Tooltip("When enabled, rows and columns are automatically calculated")]
+    [SerializeField] private bool autoLayoutGrid = true;
+    [Tooltip("Number of columns to use when auto layout is disabled")]
+    [SerializeField] private int manualColumns = 3;
+    [Tooltip("Number of rows to use when auto layout is disabled")]
+    [SerializeField] private int manualRows = 2;
+    [Tooltip("Maximum number of columns in auto layout mode")]
+    [SerializeField] private int maxAutoColumns = 4;
+    [Tooltip("Maximum number of rows in auto layout mode")]
+    [SerializeField] private int maxAutoRows = 2;
+
+    [Header("Cell Size")]
+    [Tooltip("When enabled, cell size is calculated automatically based on screen size")]
+    [SerializeField] private bool autoSizeCells = true;
+    [Tooltip("Width of each cell in pixels when auto-sizing is disabled")]
+    [SerializeField] private float manualCellWidth = 320f;
+    [Tooltip("Height of each cell is determined by width and aspect ratio")]
+    [SerializeField] private bool maintainAspectRatio = true;
+    [Tooltip("Manual height of each cell in pixels when not maintaining aspect ratio")]
+    [SerializeField] private float manualCellHeight = 180f;
 
     [Header("Resources (optional)")]
     [SerializeField] private NdiResources ndiResources;
@@ -38,6 +62,7 @@ public class NDIViewerManager : MonoBehaviour
 
     [Header("Tile Appearance")]
     [SerializeField] private Color tileBorderColor = Color.white;
+    [SerializeField] private Color activeTileBorderColor = Color.green;
     [SerializeField] private float tileBorderWidth = 1f;
 
     [Header("Settings Panel Item Appearance")]
@@ -67,10 +92,16 @@ public class NDIViewerManager : MonoBehaviour
     // UI refs
     private Transform settingsPanel; // global reorder panel
     private Transform settingsListContainer;
+    private Text activeStatusText; // Reference to the status bar text
+
+    // Reordering state
+    private bool isInEditMode = false;
+    private CameraInfo selectedCamera = null;
 
     private static Font BuiltinFont;
 
     private float _lastScale;
+    private bool _needsRefresh = false;
 
     private void Awake()
     {
@@ -84,6 +115,7 @@ public class NDIViewerManager : MonoBehaviour
     private void Start()
     {
         SetupCanvas();
+        CreateStatusBar();
         AutoLoadCameras();
         // Start polling for new sources every few seconds
         StartCoroutine(SourceRefreshLoop());
@@ -134,6 +166,38 @@ public class NDIViewerManager : MonoBehaviour
         _gridGroup.childAlignment = TextAnchor.UpperLeft;
     }
 
+    private void CreateStatusBar()
+    {
+        var statusBar = new GameObject("StatusBar", typeof(RectTransform), typeof(Image));
+        statusBar.transform.SetParent(_canvas.transform, false);
+        
+        var rt = statusBar.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0, 0);
+        rt.anchorMax = new Vector2(1, 0);
+        rt.pivot = new Vector2(0.5f, 0);
+        rt.sizeDelta = new Vector2(0, 30); // Height of 30 pixels
+        rt.anchoredPosition = new Vector2(0, 0);
+        
+        var bgImage = statusBar.GetComponent<Image>();
+        bgImage.color = new Color(0, 0, 0, 0.8f);
+        
+        var textObj = new GameObject("StatusText", typeof(RectTransform), typeof(Text));
+        textObj.transform.SetParent(statusBar.transform, false);
+        
+        var textRT = textObj.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(10, 5);
+        textRT.offsetMax = new Vector2(-10, -5);
+        
+        activeStatusText = textObj.GetComponent<Text>();
+        activeStatusText.font = BuiltinFont;
+        activeStatusText.fontSize = 14;
+        activeStatusText.alignment = TextAnchor.MiddleLeft;
+        activeStatusText.color = Color.white;
+        activeStatusText.text = "No active camera";
+    }
+
     private void AutoLoadCameras()
     {
         cameras.Clear();
@@ -141,14 +205,21 @@ public class NDIViewerManager : MonoBehaviour
         {
             AddCameraInternal(src, src); // niceName defaults to src
         }
+        
+        // Set the first camera as active if we have any
+        if (cameras.Count > 0)
+        {
+            SetActiveCamera(cameras[0]);
+        }
     }
 
-    private void AddCameraInternal(string sourceName, string niceName)
+    private CameraInfo AddCameraInternal(string sourceName, string niceName)
     {
         var info = new CameraInfo { sourceName = sourceName, niceName = niceName };
         cameras.Add(info);
         CreateTile(info);
         RefreshGlobalSettingsList();
+        return info;
     }
 
     private void CreateTile(CameraInfo cam)
@@ -199,12 +270,13 @@ public class NDIViewerManager : MonoBehaviour
         cam.rawImage = rawImage;
         cam.tileObject = container;
 
-        // Title text (niceName)
+        // Title text (nice name)
         var titleObj = new GameObject("Title", typeof(RectTransform));
         titleObj.transform.SetParent(container.transform, false);
         var titleText = titleObj.AddComponent<Text>();
         titleText.font = BuiltinFont;
         titleText.text = cam.niceName;
+        titleText.fontSize = 14;
         titleText.alignment = TextAnchor.UpperLeft;
         titleText.color = Color.white;
         var titleRT = titleObj.GetComponent<RectTransform>();
@@ -214,6 +286,22 @@ public class NDIViewerManager : MonoBehaviour
         titleRT.offsetMin = new Vector2(4, -20);
         titleRT.offsetMax = new Vector2(-4, 0);
 
+        // NDI source name text
+        var sourceObj = new GameObject("SourceName", typeof(RectTransform));
+        sourceObj.transform.SetParent(container.transform, false);
+        var sourceText = sourceObj.AddComponent<Text>();
+        sourceText.font = BuiltinFont;
+        sourceText.text = "NDI: " + cam.sourceName;
+        sourceText.fontSize = 10; // Smaller font
+        sourceText.alignment = TextAnchor.UpperLeft;
+        sourceText.color = new Color(0.8f, 0.8f, 0.8f); // Slightly dimmer color
+        var sourceRT = sourceObj.GetComponent<RectTransform>();
+        sourceRT.anchorMin = new Vector2(0, 1);
+        sourceRT.anchorMax = new Vector2(1, 1);
+        sourceRT.pivot = new Vector2(0, 1);
+        sourceRT.offsetMin = new Vector2(4, -40); // Position below the title
+        sourceRT.offsetMax = new Vector2(-4, -20);
+
         // Gear button bottom-left
         var gearBtn = CreateIconButton(container.transform, cameraGearIconTexture, "⚙", new Vector2(0, 0), TextAnchor.MiddleCenter);
         gearBtn.onClick.AddListener(() => { ShowTileSettings(cam, titleText); });
@@ -221,6 +309,14 @@ public class NDIViewerManager : MonoBehaviour
         // Position inside tile with padding
         var gRT = gearBtn.GetComponent<RectTransform>();
         gRT.anchoredPosition = new Vector2(12, 12);
+
+        // Add a button component to the container for click handling
+        var btn = container.AddComponent<Button>();
+        var colors = btn.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
+        btn.colors = colors;
+        btn.onClick.AddListener(() => { SetActiveCamera(cam); });
 
         ConfigureGridLayout();
     }
@@ -272,7 +368,7 @@ public class NDIViewerManager : MonoBehaviour
         rt.anchorMin = new Vector2(0.5f, 0.5f);
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(300, 200); // Fixed width and height
+        rt.sizeDelta = new Vector2(300, 220); // Increased height to fit both names
         rt.anchoredPosition = Vector2.zero; // Center in parent
 
         // Create a container for content with padding
@@ -285,29 +381,79 @@ public class NDIViewerManager : MonoBehaviour
         containerRT.offsetMin = new Vector2(20, 20); // 20px padding from edges
         containerRT.offsetMax = new Vector2(-20, -20); // 20px padding from edges
 
-        // NDI name label
-        var ndiLabel = CreateLabel(contentContainer.transform, "NDI: " + cam.sourceName);
+        // NDI name label (non-editable)
+        var ndiLabelTitle = CreateLabel(contentContainer.transform, "NDI Source Name (Cannot be changed):");
+        ndiLabelTitle.fontSize = 12;
+        ndiLabelTitle.color = new Color(0.7f, 0.7f, 0.7f);
+        
+        // NDI name value
+        var ndiLabelValue = CreateLabel(contentContainer.transform, cam.sourceName);
+        ndiLabelValue.alignment = TextAnchor.UpperLeft;
+        ndiLabelValue.color = Color.white;
+        
+        // Position the NDI value label
+        var ndiValueRT = ndiLabelValue.GetComponent<RectTransform>();
+        ndiValueRT.offsetMin = new Vector2(4, -48);
+        ndiValueRT.offsetMax = new Vector2(-4, -28);
+        
+        // Nice name label (editable)
+        var niceLabelTitle = CreateLabel(contentContainer.transform, "Display Name (Editable):");
+        niceLabelTitle.fontSize = 12;
+        niceLabelTitle.color = new Color(0.7f, 0.7f, 0.7f);
+        
+        // Position the nice name title
+        var niceTitleRT = niceLabelTitle.GetComponent<RectTransform>();
+        niceTitleRT.offsetMin = new Vector2(4, -78);
+        niceTitleRT.offsetMax = new Vector2(-4, -58);
+        
         var input = CreateInputField(contentContainer.transform, cam.niceName);
         var saveBtn = CreateButton(contentContainer.transform, "Save");
 
-        // Position input field below label with more padding
+        // Position input field below the nice name label
         var inRT = input.GetComponent<RectTransform>();
         inRT.anchorMin = new Vector2(0,1);
         inRT.anchorMax = new Vector2(1,1);
         inRT.pivot = new Vector2(0.5f,1);
-        inRT.anchoredPosition = new Vector2(0, -60);  // Increased from -50
+        inRT.anchoredPosition = new Vector2(0, -100);
 
-        // Position save button bottom center inside popup with more padding
+        // Position save button bottom center inside popup
         var sbRT = saveBtn.GetComponent<RectTransform>();
         sbRT.anchorMin = new Vector2(0.5f, 0);
         sbRT.anchorMax = new Vector2(0.5f, 0);
         sbRT.pivot = new Vector2(0.5f, 0);
-        sbRT.anchoredPosition = new Vector2(0, 40);  // Increased from 30
-        sbRT.sizeDelta = new Vector2(100, 36);  // Maintained larger touch target
+        sbRT.anchoredPosition = new Vector2(0, 40);
+        sbRT.sizeDelta = new Vector2(100, 36);
 
         saveBtn.onClick.AddListener(() => {
             cam.niceName = input.text.Trim();
+            
+            // Update both text elements
             titleText.text = cam.niceName;
+            
+            // Find and update the source name display in the list panel if it exists
+            if (settingsListContainer != null)
+            {
+                foreach (Transform child in settingsListContainer)
+                {
+                    var cli = child.GetComponent<CameraListItem>();
+                    if (cli != null && cli.cameraInfo == cam)
+                    {
+                        var itemText = child.GetComponentInChildren<Text>();
+                        if (itemText != null)
+                        {
+                            itemText.text = cam.niceName;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // Update status bar if this is the active camera
+            if (cam.isActive && activeStatusText != null)
+            {
+                activeStatusText.text = $"Active Camera: {cam.niceName} (NDI: {cam.sourceName})";
+            }
+            
             Destroy(popup);
             RefreshGlobalSettingsList();
         });
@@ -473,90 +619,203 @@ public class NDIViewerManager : MonoBehaviour
     {
         if (settingsListContainer == null) return;
 
+        // Only proceed if we're in play mode
+        if (!Application.isPlaying) return;
+
+        // Clear existing items
         foreach (Transform child in settingsListContainer)
             Destroy(child.gameObject);
 
-        foreach (var cam in cameras)
+        // If we're in edit mode and have a selected camera, show insertion points
+        if (isInEditMode && selectedCamera != null)
         {
-            var item = new GameObject("Item", typeof(RectTransform), typeof(Image), typeof(CameraListItem));
-            item.transform.SetParent(settingsListContainer, false);
-            var img = item.GetComponent<Image>();
-            img.color = settingsItemBackground;
-            var rt = item.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(settingsItemWidth, settingsItemHeight);
+            // Add insertion point at the beginning
+            CreateInsertionPoint(0);
             
-            var txt = new GameObject("Text", typeof(RectTransform));
-            txt.transform.SetParent(item.transform, false);
-            var t = txt.AddComponent<Text>();
-            t.font = BuiltinFont;
-            t.text = cam.niceName;
-            t.alignment = TextAnchor.MiddleCenter;
-            t.color = settingsItemTextColor;
+            // Add items and insertion points
+            for (int i = 0; i < cameras.Count; i++)
+            {
+                var cam = cameras[i];
+                
+                // Create the camera item
+                var item = CreateCameraListItem(cam);
+                
+                // Highlight the selected camera
+                if (cam == selectedCamera)
+                {
+                    var img = item.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        img.color = new Color(0.7f, 0.9f, 0.7f); // Light green highlight
+                    }
+                }
+                
+                // Add insertion point after this item (if not already at the end)
+                if (i < cameras.Count - 1)
+                {
+                    CreateInsertionPoint(i + 1);
+                }
+            }
             
-            // Make text fill the rectangle with small padding
-            var textRT = txt.GetComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = new Vector2(5, 0);
-            textRT.offsetMax = new Vector2(-5, 0);
-            
-            var le = item.AddComponent<LayoutElement>();
-            le.minHeight = settingsItemHeight;
-            le.minWidth = settingsItemWidth;
-            le.preferredHeight = settingsItemHeight;
-            le.preferredWidth = settingsItemWidth;
-            le.flexibleHeight = 0;
-            le.flexibleWidth = 0;
-
-            var drag = item.AddComponent<DraggableItem>();
-            drag.OnDropCallback = () => { ApplyNewOrderFromSettings(); };
-
-            // Store reference
-            item.GetComponent<CameraListItem>().cameraInfo = cam;
+            // Add final insertion point at the end
+            CreateInsertionPoint(cameras.Count);
+        }
+        else
+        {
+            // Normal mode - just show camera items
+            foreach (var cam in cameras)
+            {
+                CreateCameraListItem(cam);
+            }
         }
 
-        var newList = new List<CameraInfo>();
-        foreach (Transform child in settingsListContainer)
+        if (cameras.Count > 0)
         {
-            var cli = child.GetComponent<CameraListItem>();
-            if (cli != null && cli.cameraInfo != null) newList.Add(cli.cameraInfo);
-        }
-
-        if (newList.Count == 0) return;
-
-        for (int i = 0; i < cameras.Count; i++)
-        {
-            cameras[i].tileObject.transform.SetSiblingIndex(i);
+            // Set sibling indexes to match the camera list order
+            for (int i = 0; i < cameras.Count; i++)
+            {
+                cameras[i].tileObject.transform.SetSiblingIndex(i);
+            }
         }
 
         ConfigureGridLayout();
     }
 
-    private void ApplyNewOrderFromSettings()
+    // Helper to create a camera list item
+    private GameObject CreateCameraListItem(CameraInfo cam)
     {
-        // Build new order from children sequence
-        var newList = new List<CameraInfo>();
-        foreach (Transform child in settingsListContainer)
-        {
-            var cli = child.GetComponent<CameraListItem>();
-            if (cli != null && cli.cameraInfo != null) newList.Add(cli.cameraInfo);
-        }
+        var item = new GameObject("Item", typeof(RectTransform), typeof(Image));
+        item.transform.SetParent(settingsListContainer, false);
+        var img = item.GetComponent<Image>();
+        img.color = settingsItemBackground;
+        var rt = item.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(settingsItemWidth, settingsItemHeight);
+        
+        var txt = new GameObject("Text", typeof(RectTransform));
+        txt.transform.SetParent(item.transform, false);
+        var t = txt.AddComponent<Text>();
+        t.font = BuiltinFont;
+        t.text = cam.niceName;
+        t.alignment = TextAnchor.MiddleCenter;
+        t.color = settingsItemTextColor;
+        
+        // Make text fill the rectangle with small padding
+        var textRT = txt.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(5, 0);
+        textRT.offsetMax = new Vector2(-5, 0);
+        
+        var le = item.AddComponent<LayoutElement>();
+        le.minHeight = settingsItemHeight;
+        le.minWidth = settingsItemWidth;
+        le.preferredHeight = settingsItemHeight;
+        le.preferredWidth = settingsItemWidth;
+        le.flexibleHeight = 0;
+        le.flexibleWidth = 0;
 
-        if (newList.Count == 0) return;
+        // Store reference
+        var cli = item.AddComponent<CameraListItem>();
+        cli.cameraInfo = cam;
+        
+        // Add button component for selection
+        var btn = item.AddComponent<Button>();
+        btn.onClick.AddListener(() => {
+            // Toggle edit mode when clicking an item
+            if (isInEditMode && selectedCamera == cam)
+            {
+                // Clicking the same item again exits edit mode
+                isInEditMode = false;
+                selectedCamera = null;
+            }
+            else
+            {
+                // Enter edit mode with this camera selected
+                isInEditMode = true;
+                selectedCamera = cam;
+            }
+            RefreshGlobalSettingsList();
+        });
+        
+        return item;
+    }
 
-        cameras.Clear();
-        cameras.AddRange(newList);
-
-        // Reorder tiles in grid
-        for (int i = 0; i < cameras.Count; i++)
-        {
-            cameras[i].tileObject.transform.SetSiblingIndex(i);
-        }
-
-        ConfigureGridLayout();
+    // Helper to create insertion point buttons
+    private void CreateInsertionPoint(int insertIndex)
+    {
+        var container = new GameObject("InsertPoint", typeof(RectTransform), typeof(LayoutElement));
+        container.transform.SetParent(settingsListContainer, false);
+        
+        var le = container.GetComponent<LayoutElement>();
+        le.minHeight = 24; // Height for the insertion point
+        le.minWidth = settingsItemWidth;
+        le.preferredHeight = 24;
+        le.preferredWidth = settingsItemWidth;
+        
+        var btn = new GameObject("PlusButton", typeof(RectTransform), typeof(Image), typeof(Button));
+        btn.transform.SetParent(container.transform, false);
+        
+        var rt = btn.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(24, 24); // Square plus button
+        
+        var img = btn.GetComponent<Image>();
+        img.color = new Color(0.2f, 0.7f, 0.2f); // Green for the plus button
+        
+        // Add "+" text
+        var txtObj = new GameObject("PlusText", typeof(RectTransform), typeof(Text));
+        txtObj.transform.SetParent(btn.transform, false);
+        
+        var txtRT = txtObj.GetComponent<RectTransform>();
+        txtRT.anchorMin = Vector2.zero;
+        txtRT.anchorMax = Vector2.one;
+        txtRT.offsetMin = Vector2.zero;
+        txtRT.offsetMax = Vector2.zero;
+        
+        var txt = txtObj.GetComponent<Text>();
+        txt.text = "+";
+        txt.font = BuiltinFont;
+        txt.fontSize = 18;
+        txt.alignment = TextAnchor.MiddleCenter;
+        txt.color = Color.white;
+        
+        // Add click handler to move the selected camera to this position
+        var button = btn.GetComponent<Button>();
+        button.onClick.AddListener(() => {
+            // Get the current index of the selected camera
+            int fromIndex = cameras.IndexOf(selectedCamera);
+            if (fromIndex >= 0)
+            {
+                // Determine the actual insertion index
+                // If moving forward in the list, need to account for removing the item first
+                int toIndex = insertIndex;
+                if (toIndex > fromIndex) toIndex--;
+                
+                // Reorder the camera list
+                cameras.RemoveAt(fromIndex);
+                cameras.Insert(toIndex, selectedCamera);
+                
+                // Exit edit mode
+                isInEditMode = false;
+                selectedCamera = null;
+                
+                // Refresh UI
+                RefreshGlobalSettingsList();
+                
+                // Apply the new order to the grid
+                for (int i = 0; i < cameras.Count; i++)
+                {
+                    cameras[i].tileObject.transform.SetSiblingIndex(i);
+                }
+                
+                ConfigureGridLayout();
+            }
+        });
     }
 
     // --- Layout computation --------------------------------------------------
@@ -564,18 +823,55 @@ public class NDIViewerManager : MonoBehaviour
     {
         int total = cameras.Count;
         if (total == 0) return;
-        int columns = Mathf.Min(3, total);
-        int rows = Mathf.CeilToInt(total / (float)columns);
-        rows = Mathf.Min(rows, 2);
+        
+        // Determine columns and rows based on settings
+        int columns, rows;
+        
+        if (autoLayoutGrid)
+        {
+            // Auto layout mode - calculate based on number of cameras with configured maximums
+            columns = Mathf.Min(maxAutoColumns, total);
+            rows = Mathf.CeilToInt(total / (float)columns);
+            rows = Mathf.Min(rows, maxAutoRows);
+        }
+        else
+        {
+            // Manual layout mode - use user-defined values
+            columns = Mathf.Max(1, manualColumns); // Ensure at least 1 column
+            rows = Mathf.Max(1, manualRows);       // Ensure at least 1 row
+        }
+        
+        // Determine cell size based on settings
+        float cellWidth, cellHeight;
+        
+        if (autoSizeCells)
+        {
+            // Auto size mode - calculate based on screen size
+            float gameWidth = Screen.width;
+            float usableWidth = gameWidth - 2 * padding;
+            float totalSpacing = (columns - 1) * padding;
+            cellWidth = (usableWidth - totalSpacing) / columns;
+            float maxAllowed = (gameWidth - 2 * padding);
+            cellWidth = Mathf.Min(cellWidth, maxAllowed);
+            cellHeight = cellWidth / aspectRatio;
+        }
+        else
+        {
+            // Manual size mode - use user-defined values
+            cellWidth = manualCellWidth;
+            
+            // Determine height based on aspect ratio setting
+            if (maintainAspectRatio)
+            {
+                cellHeight = cellWidth / aspectRatio;
+            }
+            else
+            {
+                cellHeight = manualCellHeight;
+            }
+        }
 
-        float gameWidth = Screen.width;
-        float usableWidth = gameWidth - 2 * padding;
-        float totalSpacing = (columns - 1) * padding;
-        float cellWidth = (usableWidth - totalSpacing) / columns;
-        float maxAllowed = (gameWidth - 2 * padding) / 2f;
-        cellWidth = Mathf.Min(cellWidth, maxAllowed);
-        float cellHeight = cellWidth / aspectRatio;
-
+        // Apply cell size and column constraint
         _gridGroup.cellSize = new Vector2(cellWidth, cellHeight);
         _gridGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         _gridGroup.constraintCount = columns;
@@ -591,6 +887,13 @@ public class NDIViewerManager : MonoBehaviour
             {
                 cam.rawImage.texture = tex;
             }
+        }
+        
+        // Apply deferred refresh if needed
+        if (_needsRefresh && Application.isPlaying)
+        {
+            _needsRefresh = false;
+            RefreshAppearanceFromInspector();
         }
     }
 
@@ -609,38 +912,62 @@ public class NDIViewerManager : MonoBehaviour
         foreach (var c in cameras) existing.Add(c.sourceName);
 
         bool addedAny = false;
+        CameraInfo firstNewCamera = null;
+        
         foreach (var src in NdiFinder.sourceNames)
         {
             if (!existing.Contains(src))
             {
-                AddCameraInternal(src, src);
+                CameraInfo newCam = AddCameraInternal(src, src);
+                if (firstNewCamera == null) firstNewCamera = newCam;
                 addedAny = true;
             }
         }
 
-        if (addedAny) ConfigureGridLayout();
+        // If we added cameras and have no active camera, set the first new one as active
+        if (addedAny)
+        {
+            bool hasActiveCamera = cameras.Any(c => c.isActive);
+            if (!hasActiveCamera && firstNewCamera != null)
+            {
+                SetActiveCamera(firstNewCamera);
+            }
+            
+            ConfigureGridLayout();
+        }
     }
 
     // Called when inspector values change in editor
     private void OnValidate()
     {
-        // Only attempt to refresh if already running
-        if (Application.isPlaying && _gridGroup != null)
-        {
-            RefreshAppearanceFromInspector();
-        }
+        // Apply constraint values immediately
+        manualColumns = Mathf.Max(1, manualColumns); // Ensure at least 1 column
+        manualRows = Mathf.Max(1, manualRows);       // Ensure at least 1 row
+        maxAutoColumns = Mathf.Max(1, maxAutoColumns);
+        maxAutoRows = Mathf.Max(1, maxAutoRows);
+        
+        // Validate cell size values
+        manualCellWidth = Mathf.Max(50f, manualCellWidth);   // Minimum width
+        manualCellHeight = Mathf.Max(50f, manualCellHeight); // Minimum height
+        
+        // Flag for deferred refresh only - NEVER call the refresh methods directly from here
+        _needsRefresh = true;
     }
 
     // Updates appearance based on current inspector values
     private void RefreshAppearanceFromInspector()
     {
+        // Only continue if we're in play mode
+        if (!Application.isPlaying) return;
+        
         // Apply tile borders to all existing cameras
         foreach (var cam in cameras)
         {
             var border = cam.tileObject.GetComponent<Image>();
             if (border != null)
             {
-                border.color = tileBorderColor;
+                // Apply proper color based on active status
+                border.color = cam.isActive ? activeTileBorderColor : tileBorderColor;
                 
                 var innerRT = border.transform.GetChild(0)?.GetComponent<RectTransform>();
                 if (innerRT != null)
@@ -680,10 +1007,49 @@ public class NDIViewerManager : MonoBehaviour
                 }
             }
 
-            // Update list items
-            RefreshGlobalSettingsList();
+            // ONLY update list items if in play mode to avoid component validation errors
+            if (Application.isPlaying)
+            {
+                // Update list items
+                RefreshGlobalSettingsList();
+            }
         }
 
         ConfigureGridLayout();
+    }
+
+    // New method to set the active camera
+    public void SetActiveCamera(CameraInfo camera)
+    {
+        // Deactivate all cameras first
+        foreach (var cam in cameras)
+        {
+            cam.isActive = false;
+            if (cam.tileObject != null)
+            {
+                var border = cam.tileObject.GetComponent<Image>();
+                if (border != null)
+                {
+                    border.color = tileBorderColor;
+                }
+            }
+        }
+        
+        // Set and highlight the new active camera
+        camera.isActive = true;
+        if (camera.tileObject != null)
+        {
+            var border = camera.tileObject.GetComponent<Image>();
+            if (border != null)
+            {
+                border.color = activeTileBorderColor;
+            }
+        }
+        
+        // Update status text with both names
+        if (activeStatusText != null)
+        {
+            activeStatusText.text = $"Active Camera: {camera.niceName} (NDI: {camera.sourceName})";
+        }
     }
 }
