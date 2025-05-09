@@ -40,6 +40,23 @@ public class NDIViewerManager : MonoBehaviour
     [SerializeField] private Color tileBorderColor = Color.white;
     [SerializeField] private float tileBorderWidth = 1f;
 
+    [Header("Settings Panel Item Appearance")]
+    [SerializeField] private float settingsItemWidth = 200f;
+    [SerializeField] private float settingsItemHeight = 24f;
+    [SerializeField] private Color settingsItemBackground = Color.white;
+    [SerializeField] private Color settingsItemTextColor = Color.black;
+
+    [Header("Settings Panel Appearance")]
+    [SerializeField] private Color settingsPanelBackground = new Color(0,0,0,1f);
+    [Tooltip("Background color for the scroll area containing draggable items")]
+    [SerializeField] private Color settingsScrollBackground = Color.white;
+    [Tooltip("Vertical padding (in pixels) for the scroll container")]
+    [SerializeField] private float settingsScrollVerticalPadding = 40f;
+
+    [Header("Settings Panel Size")]
+    [SerializeField] private float settingsPanelWidth = 300f;
+    [SerializeField] private float settingsPanelHeight = 400f;
+
     private readonly List<CameraInfo> cameras = new List<CameraInfo>();
 
     private Canvas _canvas;
@@ -52,6 +69,8 @@ public class NDIViewerManager : MonoBehaviour
     private Transform settingsListContainer;
 
     private static Font BuiltinFont;
+
+    private float _lastScale;
 
     private void Awake()
     {
@@ -249,12 +268,12 @@ public class NDIViewerManager : MonoBehaviour
         var img = popup.GetComponent<Image>();
         img.color = new Color(0,0,0,0.8f);
         var rt = popup.GetComponent<RectTransform>();
-        // Stretch over entire tile with 40 px internal padding (increased from 30)
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
+        // Fixed size panel centered in the tile
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = new Vector2(40, 40);
-        rt.offsetMax = new Vector2(-40, -40);
+        rt.sizeDelta = new Vector2(300, 200); // Fixed width and height
+        rt.anchoredPosition = Vector2.zero; // Center in parent
 
         // Create a container for content with padding
         var contentContainer = new GameObject("ContentContainer", typeof(RectTransform));
@@ -407,30 +426,37 @@ public class NDIViewerManager : MonoBehaviour
         var panelObj = new GameObject("SettingsPanel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(_canvas.transform, false);
         var img = panelObj.GetComponent<Image>();
-        img.color = new Color(0,0,0,0.8f);
+        img.color = settingsPanelBackground;
         var rt = panelObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0,0);
-        rt.anchorMax = new Vector2(1,1);
-        rt.pivot = new Vector2(0.5f,0.5f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        rt.anchorMin = new Vector2(1, 1); // Top-right anchor
+        rt.anchorMax = new Vector2(1, 1); // Top-right anchor
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(settingsPanelWidth, settingsPanelHeight);
+        rt.anchoredPosition = new Vector2(-settingsPanelWidth/2 - padding, -settingsPanelHeight/2 - padding);
 
         // Scroll view container simplified as vertical layout
         var scroll = new GameObject("Scroll", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(Mask), typeof(Image));
         scroll.transform.SetParent(panelObj.transform, false);
         var scrt = scroll.GetComponent<RectTransform>();
-        scrt.anchorMin = new Vector2(0,0);
-        scrt.anchorMax = new Vector2(1,1);
-        scrt.pivot = new Vector2(0.5f,0.5f);
-        scrt.offsetMin = new Vector2(20,20);
-        scrt.offsetMax = new Vector2(-20,-20);
+        scrt.anchorMin = new Vector2(0.5f, 0f);
+        scrt.anchorMax = new Vector2(0.5f, 1f);
+        scrt.pivot = new Vector2(0.5f, 0.5f);
+
+        float scrollWidth = settingsItemWidth + 2 * 10f; // item width plus side padding
+        scrt.sizeDelta = new Vector2(scrollWidth, -settingsScrollVerticalPadding); // use inspected padding value
+        scrt.anchoredPosition = Vector2.zero;
         var vlg = scroll.GetComponent<VerticalLayoutGroup>();
-        vlg.spacing = 10f;
-        vlg.padding = new RectOffset(20,20,20,20);
-        vlg.childAlignment = TextAnchor.MiddleCenter;
+        vlg.spacing = 4f;
+        vlg.padding = new RectOffset(4,4,4,4);
+        vlg.childForceExpandWidth = false;
+        vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = false;
+        vlg.childControlHeight = false;
+        vlg.childAlignment = TextAnchor.UpperCenter;
         var scrollImg = scroll.GetComponent<Image>();
-        scrollImg.color = new Color(1,1,1,0.1f);
+        scrollImg.color = settingsScrollBackground;
         settingsListContainer = scroll.transform;
+        
 
         // Close button (top-right inside panel)
         var closeBtn = CreateIconButton(panelObj.transform, closeIconTexture, "X", new Vector2(1,1), TextAnchor.MiddleCenter);
@@ -452,28 +478,61 @@ public class NDIViewerManager : MonoBehaviour
 
         foreach (var cam in cameras)
         {
-            var item = new GameObject("Item", typeof(RectTransform), typeof(Image));
+            var item = new GameObject("Item", typeof(RectTransform), typeof(Image), typeof(CameraListItem));
             item.transform.SetParent(settingsListContainer, false);
             var img = item.GetComponent<Image>();
-            img.color = new Color(1,1,1,0.1f);
+            img.color = settingsItemBackground;
             var rt = item.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(0,28);
-
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(settingsItemWidth, settingsItemHeight);
+            
             var txt = new GameObject("Text", typeof(RectTransform));
             txt.transform.SetParent(item.transform, false);
             var t = txt.AddComponent<Text>();
             t.font = BuiltinFont;
             t.text = cam.niceName;
-            t.alignment = TextAnchor.MiddleLeft;
-            t.color = Color.white;
+            t.alignment = TextAnchor.MiddleCenter;
+            t.color = settingsItemTextColor;
+            
+            // Make text fill the rectangle with small padding
+            var textRT = txt.GetComponent<RectTransform>();
+            textRT.anchorMin = Vector2.zero;
+            textRT.anchorMax = Vector2.one;
+            textRT.offsetMin = new Vector2(5, 0);
+            textRT.offsetMax = new Vector2(-5, 0);
+            
             var le = item.AddComponent<LayoutElement>();
-            le.preferredHeight = 28;
+            le.minHeight = settingsItemHeight;
+            le.minWidth = settingsItemWidth;
+            le.preferredHeight = settingsItemHeight;
+            le.preferredWidth = settingsItemWidth;
+            le.flexibleHeight = 0;
+            le.flexibleWidth = 0;
 
             var drag = item.AddComponent<DraggableItem>();
             drag.OnDropCallback = () => { ApplyNewOrderFromSettings(); };
-            drag.GetComponent<LayoutElement>().preferredWidth = 200;
-            drag.OnDropCallback = () => { ApplyNewOrderFromSettings(); };
+
+            // Store reference
+            item.GetComponent<CameraListItem>().cameraInfo = cam;
         }
+
+        var newList = new List<CameraInfo>();
+        foreach (Transform child in settingsListContainer)
+        {
+            var cli = child.GetComponent<CameraListItem>();
+            if (cli != null && cli.cameraInfo != null) newList.Add(cli.cameraInfo);
+        }
+
+        if (newList.Count == 0) return;
+
+        for (int i = 0; i < cameras.Count; i++)
+        {
+            cameras[i].tileObject.transform.SetSiblingIndex(i);
+        }
+
+        ConfigureGridLayout();
     }
 
     private void ApplyNewOrderFromSettings()
@@ -482,10 +541,12 @@ public class NDIViewerManager : MonoBehaviour
         var newList = new List<CameraInfo>();
         foreach (Transform child in settingsListContainer)
         {
-            var txt = child.GetComponentInChildren<Text>();
-            var cam = cameras.Find(c => c.niceName == txt.text);
-            if (cam != null) newList.Add(cam);
+            var cli = child.GetComponent<CameraListItem>();
+            if (cli != null && cli.cameraInfo != null) newList.Add(cli.cameraInfo);
         }
+
+        if (newList.Count == 0) return;
+
         cameras.Clear();
         cameras.AddRange(newList);
 
@@ -494,6 +555,8 @@ public class NDIViewerManager : MonoBehaviour
         {
             cameras[i].tileObject.transform.SetSiblingIndex(i);
         }
+
+        ConfigureGridLayout();
     }
 
     // --- Layout computation --------------------------------------------------
@@ -557,4 +620,70 @@ public class NDIViewerManager : MonoBehaviour
 
         if (addedAny) ConfigureGridLayout();
     }
-} 
+
+    // Called when inspector values change in editor
+    private void OnValidate()
+    {
+        // Only attempt to refresh if already running
+        if (Application.isPlaying && _gridGroup != null)
+        {
+            RefreshAppearanceFromInspector();
+        }
+    }
+
+    // Updates appearance based on current inspector values
+    private void RefreshAppearanceFromInspector()
+    {
+        // Apply tile borders to all existing cameras
+        foreach (var cam in cameras)
+        {
+            var border = cam.tileObject.GetComponent<Image>();
+            if (border != null)
+            {
+                border.color = tileBorderColor;
+                
+                var innerRT = border.transform.GetChild(0)?.GetComponent<RectTransform>();
+                if (innerRT != null)
+                {
+                    innerRT.offsetMin = new Vector2(tileBorderWidth, tileBorderWidth);
+                    innerRT.offsetMax = new Vector2(-tileBorderWidth, -tileBorderWidth);
+                }
+            }
+        }
+
+        // Apply settings panel appearance
+        if (settingsPanel != null)
+        {
+            var panelImg = settingsPanel.GetComponent<Image>();
+            if (panelImg != null)
+            {
+                panelImg.color = settingsPanelBackground;
+                
+                var panelRT = settingsPanel.GetComponent<RectTransform>();
+                if (panelRT != null)
+                {
+                    panelRT.sizeDelta = new Vector2(settingsPanelWidth, settingsPanelHeight);
+                    panelRT.anchoredPosition = new Vector2(-settingsPanelWidth/2 - padding, -settingsPanelHeight/2 - padding);
+                }
+            }
+
+            var scrollRT = settingsListContainer?.parent as RectTransform;
+            if (scrollRT != null)
+            {
+                float scrollWidth = settingsItemWidth + 2 * 10f;
+                scrollRT.sizeDelta = new Vector2(scrollWidth, -settingsScrollVerticalPadding);
+                
+                var scrollImg = scrollRT.GetComponent<Image>();
+                if (scrollImg != null)
+                {
+                    scrollImg.color = settingsScrollBackground;
+                }
+            }
+
+            // Update list items
+            RefreshGlobalSettingsList();
+        }
+
+        ConfigureGridLayout();
+    }
+}
