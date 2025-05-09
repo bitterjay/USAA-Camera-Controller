@@ -20,6 +20,7 @@ public class CameraRegistry
     public event Action<CameraInfo> OnCameraRemoved;
     public event Action OnCamerasReordered;
     public event Action<CameraInfo, bool> OnFeedStatusChanged; // bool: true=available, false=lost
+    public event Action<CameraInfo> OnCameraSelected; // Added event for camera selection
     
     // Properties
     public IReadOnlyList<CameraInfo> Cameras => cameras;
@@ -189,7 +190,16 @@ public class CameraRegistry
         
         // Activate the specified camera
         if (camera != null)
+        {
             camera.isActive = true;
+            Debug.Log($"CameraRegistry.SetActiveCamera: {camera.niceName} with IP {camera.viscaIp}:{camera.viscaPort}");
+            Debug.Log($"CameraRegistry: GLOBAL TRACKER before event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
+            
+            // Trigger the camera selected event
+            OnCameraSelected?.Invoke(camera);
+            
+            Debug.Log($"CameraRegistry: GLOBAL TRACKER after event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
+        }
     }
     
     /// <summary>
@@ -263,6 +273,33 @@ public class CameraRegistry
                 cam.isFeedAvailable = available;
                 OnFeedStatusChanged?.Invoke(cam, available);
             }
+        }
+    }
+    
+    /// <summary>
+    /// Updates the VISCA connection settings for a camera
+    /// </summary>
+    /// <param name="camera">The camera to update</param>
+    /// <param name="viscaIp">New VISCA IP address</param>
+    /// <param name="viscaPort">New VISCA port</param>
+    public void UpdateCameraConnection(CameraInfo camera, string viscaIp, int viscaPort)
+    {
+        if (camera == null)
+            return;
+            
+        Debug.Log($"Updating camera {camera.niceName} connection settings - IP: {viscaIp}, Port: {viscaPort}");
+        Debug.Log($"CameraRegistry.UpdateCameraConnection: GLOBAL TRACKER currently says: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
+        
+        camera.viscaIp = viscaIp;
+        camera.viscaPort = viscaPort;
+        
+        // If this is the active camera, make sure to refresh the controller
+        if (camera.isActive)
+        {
+            Debug.Log($"Active camera connection updated - Triggering camera selected event");
+            OnCameraSelected?.Invoke(camera);
+            
+            Debug.Log($"CameraRegistry: GLOBAL TRACKER after event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
         }
     }
 } 
