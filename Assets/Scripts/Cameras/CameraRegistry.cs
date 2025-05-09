@@ -1,0 +1,220 @@
+using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using Klak.Ndi;
+using System;
+
+/// <summary>
+/// Registry that manages NDI camera discovery and status
+/// </summary>
+public class CameraRegistry
+{
+    // List of available cameras
+    private readonly List<CameraInfo> cameras = new List<CameraInfo>();
+    
+    // NDI Resources
+    private NdiResources ndiResources;
+    
+    // Events
+    public event Action<CameraInfo> OnCameraAdded;
+    public event Action<CameraInfo> OnCameraRemoved;
+    public event Action OnCamerasReordered;
+    
+    // Properties
+    public IReadOnlyList<CameraInfo> Cameras => cameras;
+    public CameraInfo ActiveCamera => cameras.FirstOrDefault(c => c.isActive);
+    
+    /// <summary>
+    /// Initialize the camera registry
+    /// </summary>
+    /// <param name="resources">Optional NDI resources</param>
+    public CameraRegistry(NdiResources resources = null)
+    {
+        ndiResources = resources;
+        
+        // If no resources provided, try to find them
+        if (ndiResources == null)
+        {
+            // Try to find an existing instance
+            var found = Resources.FindObjectsOfTypeAll<NdiResources>();
+            if (found.Length > 0) ndiResources = found[0];
+            
+#if UNITY_EDITOR
+            if (ndiResources == null)
+            {
+                var guids = UnityEditor.AssetDatabase.FindAssets("t:Klak.Ndi.NdiResources");
+                if (guids.Length > 0)
+                {
+                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+                    ndiResources = UnityEditor.AssetDatabase.LoadAssetAtPath<NdiResources>(path);
+                }
+            }
+#endif
+        }
+    }
+    
+    /// <summary>
+    /// Automatically discover and add all available NDI sources
+    /// </summary>
+    public void AutoDiscoverCameras()
+    {
+        // Clear existing cameras
+        cameras.Clear();
+        
+        // Add all available sources
+        foreach (var sourceName in NdiFinder.sourceNames)
+        {
+            AddCamera(sourceName, sourceName);
+        }
+        
+        // Set the first camera as active if we have any
+        if (cameras.Count > 0)
+        {
+            SetActiveCamera(cameras[0]);
+        }
+    }
+    
+    /// <summary>
+    /// Adds a new camera to the registry
+    /// </summary>
+    /// <param name="sourceName">NDI source name</param>
+    /// <param name="niceName">Display name (defaults to source name)</param>
+    /// <returns>The created camera info</returns>
+    public CameraInfo AddCamera(string sourceName, string niceName = null)
+    {
+        if (string.IsNullOrEmpty(niceName))
+            niceName = sourceName;
+            
+        // Check if this source already exists
+        if (cameras.Any(c => c.sourceName == sourceName))
+            return cameras.First(c => c.sourceName == sourceName);
+            
+        // Create the camera info
+        var camera = new CameraInfo
+        {
+            sourceName = sourceName,
+            niceName = niceName
+        };
+        
+        // Create the NDI receiver
+        var receiverObj = new GameObject("Receiver_" + sourceName);
+        receiverObj.hideFlags = HideFlags.DontSave; // Don't show in hierarchy
+        camera.receiver = receiverObj.AddComponent<NdiReceiver>();
+        camera.receiver.ndiName = sourceName;
+        
+        // Set resources if available
+        if (ndiResources != null)
+            camera.receiver.SetResources(ndiResources);
+            
+        // Add to list
+        cameras.Add(camera);
+        
+        // Trigger event
+        OnCameraAdded?.Invoke(camera);
+        
+        return camera;
+    }
+    
+    /// <summary>
+    /// Removes a camera from the registry
+    /// </summary>
+    /// <param name="camera">The camera to remove</param>
+    public void RemoveCamera(CameraInfo camera)
+    {
+        // Clean up receiver
+        if (camera.receiver != null)
+        {
+            UnityEngine.Object.Destroy(camera.receiver.gameObject);
+            camera.receiver = null;
+        }
+        
+        // Remove from list
+        cameras.Remove(camera);
+        
+        // Trigger event
+        OnCameraRemoved?.Invoke(camera);
+    }
+    
+    /// <summary>
+    /// Checks for and adds any new NDI sources
+    /// </summary>
+    /// <returns>True if any new cameras were added</returns>
+    public bool RefreshSources()
+    {
+        // Get existing sources
+        var existing = new HashSet<string>();
+        foreach (var cam in cameras)
+            existing.Add(cam.sourceName);
+            
+        bool addedAny = false;
+        CameraInfo firstNewCamera = null;
+        
+        // Check for new sources
+        foreach (var src in NdiFinder.sourceNames)
+        {
+            if (!existing.Contains(src))
+            {
+                var newCam = AddCamera(src, src);
+                if (firstNewCamera == null)
+                    firstNewCamera = newCam;
+                    
+                addedAny = true;
+            }
+        }
+        
+        // If we've added cameras and have no active camera, set the first new one
+        if (addedAny && ActiveCamera == null && firstNewCamera != null)
+        {
+            SetActiveCamera(firstNewCamera);
+        }
+        
+        return addedAny;
+    }
+    
+    /// <summary>
+    /// Sets a camera as the active camera
+    /// </summary>
+    /// <param name="camera">The camera to activate</param>
+    public void SetActiveCamera(CameraInfo camera)
+    {
+        // Deactivate all cameras
+        foreach (var cam in cameras)
+        {
+            cam.isActive = false;
+        }
+        
+        // Activate the specified camera
+        if (camera != null)
+            camera.isActive = true;
+    }
+    
+    /// <summary>
+    /// Changes the display name of a camera
+    /// </summary>
+    /// <param name="camera">The camera to update</param>
+    /// <param name="newName">The new display name</param>
+    public void UpdateCameraName(CameraInfo camera, string newName)
+    {
+        if (camera != null)
+            camera.niceName = newName;
+    }
+    
+    /// <summary>
+    /// Reorders a camera to a new position in the list
+    /// </summary>
+    /// <param name="camera">The camera to move</param>
+    /// <param name="newIndex">The target position</param>
+    public void ReorderCamera(CameraInfo camera, int newIndex)
+    {
+        int currentIndex = cameras.IndexOf(camera);
+        if (currentIndex < 0 || currentIndex == newIndex)
+            return;
+            
+        // Remove and insert at new position
+        cameras.RemoveAt(currentIndex);
+        cameras.Insert(newIndex, camera);
+        
+        // Trigger event
+        OnCamerasReordered?.Invoke();
+    }
+} 

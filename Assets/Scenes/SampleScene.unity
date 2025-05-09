@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 35150460}
   - component: {fileID: 35150461}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: NDI Viewer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -164,36 +164,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 35150458}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a242d43511b24c94bc4e31081cbb092, type: 3}
+  m_Script: {fileID: 11500000, guid: 2cb6cd4ad3c5140388769ff1f7dcf484, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  padding: 10
-  aspectRatio: 1.777778
-  autoLayoutGrid: 0
-  manualColumns: 3
-  manualRows: 2
-  maxAutoColumns: 4
-  maxAutoRows: 2
-  autoSizeCells: 0
-  manualCellWidth: 480
-  maintainAspectRatio: 1
-  manualCellHeight: 180
+  layoutSettings: {fileID: 11400000, guid: a0af503c0883f4c8d9a7c4f8f16aee95, type: 2}
   ndiResources: {fileID: 0}
   globalGearIconTexture: {fileID: 2800000, guid: 1f774273406b74ba490f3677ae901bd8, type: 3}
   cameraGearIconTexture: {fileID: 2800000, guid: 1f774273406b74ba490f3677ae901bd8, type: 3}
   closeIconTexture: {fileID: 0}
-  tileBorderColor: {r: 1, g: 1, b: 1, a: 1}
-  activeTileBorderColor: {r: 0, g: 1, b: 0, a: 1}
-  tileBorderWidth: 2
-  settingsItemWidth: 200
-  settingsItemHeight: 24
-  settingsItemBackground: {r: 0.9528302, g: 0.16629584, b: 0.16629584, a: 1}
-  settingsItemTextColor: {r: 0, g: 0, b: 0, a: 1}
-  settingsPanelBackground: {r: 0, g: 0, b: 0, a: 1}
-  settingsScrollBackground: {r: 1, g: 1, b: 1, a: 0.078431375}
-  settingsScrollVerticalPadding: 40
-  settingsPanelWidth: 300
-  settingsPanelHeight: 400
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
