@@ -37,4 +37,9 @@ public class CameraInfo
     /// Whether this camera is currently active
     /// </summary>
     public bool isActive;
+    
+    /// <summary>
+    /// Whether the NDI feed is currently available
+    /// </summary>
+    public bool isFeedAvailable;
 } 

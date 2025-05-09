@@ -47,11 +47,11 @@ public class LayoutSettings : ScriptableObject
     public float AspectRatio => aspectRatio;
     
     // Grid Layout Properties
-    public bool AutoLayoutGrid => autoLayoutGrid;
+    // public bool AutoLayoutGrid => autoLayoutGrid;
     public int ManualColumns => manualColumns;
     public int ManualRows => manualRows;
-    public int MaxAutoColumns => maxAutoColumns;
-    public int MaxAutoRows => maxAutoRows;
+    // public int MaxAutoColumns => maxAutoColumns;
+    // public int MaxAutoRows => maxAutoRows;
     
     // Cell Size Properties
     public bool AutoSizeCells => autoSizeCells;

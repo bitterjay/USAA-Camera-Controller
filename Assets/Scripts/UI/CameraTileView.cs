@@ -31,6 +31,9 @@ public class CameraTileView : MonoBehaviour
     public event Action<CameraTileView> OnSelected;
     public event Action<CameraInfo, string> OnDisplayNameChanged;
     
+    private GameObject noSignalOverlay;
+    private bool overlayInitialized = false;
+    
     /// <summary>
     /// Initializes the camera tile with the given camera info
     /// </summary>
@@ -42,12 +45,69 @@ public class CameraTileView : MonoBehaviour
         CameraInfo = cameraInfo;
         layoutSettings = settings;
         gearIconTexture = gearIcon;
-        
-        // Set initial active state
         IsActive = cameraInfo.isActive;
-        
-        // Configure the appearance based on settings
         ApplySettings();
+        EnsureNoSignalOverlay();
+        SetNoSignalOverlay(!cameraInfo.isFeedAvailable);
+        // Subscribe to feed status changes
+        var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+        if (registry != null)
+        {
+            registry.OnFeedStatusChanged += OnFeedStatusChanged;
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+        if (registry != null)
+        {
+            registry.OnFeedStatusChanged -= OnFeedStatusChanged;
+        }
+    }
+    
+    private void OnFeedStatusChanged(CameraInfo cam, bool available)
+    {
+        if (cam == CameraInfo)
+        {
+            SetNoSignalOverlay(!available);
+        }
+    }
+    
+    private void EnsureNoSignalOverlay()
+    {
+        if (overlayInitialized) return;
+        overlayInitialized = true;
+        noSignalOverlay = new GameObject("NoSignalOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Image));
+        noSignalOverlay.transform.SetParent(transform, false);
+        var img = noSignalOverlay.GetComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0, 0, 0, 0.7f);
+        var rt = noSignalOverlay.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        // Add label
+        var labelObj = new GameObject("NoSignalLabel", typeof(RectTransform));
+        labelObj.transform.SetParent(noSignalOverlay.transform, false);
+        var label = labelObj.AddComponent<UnityEngine.UI.Text>();
+        label.text = "NO SIGNAL";
+        label.alignment = TextAnchor.MiddleCenter;
+        label.fontSize = 32;
+        label.color = Color.white;
+        label.font = UIFactory.BuiltinFont;
+        var labelRT = labelObj.GetComponent<RectTransform>();
+        labelRT.anchorMin = Vector2.zero;
+        labelRT.anchorMax = Vector2.one;
+        labelRT.offsetMin = Vector2.zero;
+        labelRT.offsetMax = Vector2.zero;
+        noSignalOverlay.SetActive(false);
+    }
+    
+    private void SetNoSignalOverlay(bool show)
+    {
+        if (noSignalOverlay != null)
+            noSignalOverlay.SetActive(show);
     }
     
     /// <summary>
@@ -75,13 +135,35 @@ public class CameraTileView : MonoBehaviour
     /// </summary>
     public void UpdateTexture()
     {
-        if (CameraInfo.receiver != null && videoDisplay != null)
+        if (CameraInfo == null)
         {
-            var tex = CameraInfo.receiver.texture;
-            if (tex != null && videoDisplay.texture != tex)
-            {
-                videoDisplay.texture = tex;
-            }
+            Debug.LogWarning("UpdateTexture: CameraInfo is null");
+            return;
+        }
+        
+        if (CameraInfo.receiver == null)
+        {
+            Debug.LogWarning($"UpdateTexture: Receiver is null for camera {CameraInfo.niceName}");
+            return;
+        }
+        
+        if (videoDisplay == null)
+        {
+            Debug.LogWarning($"UpdateTexture: VideoDisplay is null for camera {CameraInfo.niceName}");
+            return;
+        }
+        
+        var tex = CameraInfo.receiver.texture;
+        if (tex == null)
+        {
+            Debug.LogWarning($"UpdateTexture: Texture is null for camera {CameraInfo.niceName}");
+            return;
+        }
+        
+        if (videoDisplay.texture != tex)
+        {
+            videoDisplay.texture = tex;
+            Debug.Log($"Updated texture for camera {CameraInfo.niceName}");
         }
     }
     

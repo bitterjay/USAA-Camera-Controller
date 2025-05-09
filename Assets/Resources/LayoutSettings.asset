@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   padding: 10
   aspectRatio: 1.7777778
-  autoLayoutGrid: true
+  autoLayoutGrid: 0
   manualColumns: 3
   manualRows: 2
   maxAutoColumns: 4
   maxAutoRows: 2
-  autoSizeCells: true
-  manualCellWidth: 480
-  maintainAspectRatio: true
+  autoSizeCells: 0
+  manualCellWidth: 444.2
+  maintainAspectRatio: 1
   manualCellHeight: 180
   tileBorderColor: {r: 1, g: 1, b: 1, a: 1}
   activeTileBorderColor: {r: 0, g: 1, b: 0, a: 1}
@@ -34,4 +34,6 @@ MonoBehaviour:
   settingsScrollBackground: {r: 1, g: 1, b: 1, a: 0.078431375}
   settingsScrollVerticalPadding: 40
   settingsPanelWidth: 300
-  settingsPanelHeight: 400 
+  settingsPanelHeight: 400
+  cameraSettingsPopupWidth: 400
+  cameraSettingsPopupHeight: 300

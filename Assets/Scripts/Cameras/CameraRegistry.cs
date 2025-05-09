@@ -19,10 +19,14 @@ public class CameraRegistry
     public event Action<CameraInfo> OnCameraAdded;
     public event Action<CameraInfo> OnCameraRemoved;
     public event Action OnCamerasReordered;
+    public event Action<CameraInfo, bool> OnFeedStatusChanged; // bool: true=available, false=lost
     
     // Properties
     public IReadOnlyList<CameraInfo> Cameras => cameras;
     public CameraInfo ActiveCamera => cameras.FirstOrDefault(c => c.isActive);
+    
+    private readonly Dictionary<CameraInfo, float> lastReconnectAttempt = new Dictionary<CameraInfo, float>();
+    private const float RECONNECT_INTERVAL = 3f; // seconds
     
     /// <summary>
     /// Initialize the camera registry
@@ -216,5 +220,49 @@ public class CameraRegistry
         
         // Trigger event
         OnCamerasReordered?.Invoke();
+    }
+    
+    /// <summary>
+    /// Checks the feed status for all cameras and attempts to reconnect if the feed is lost
+    /// </summary>
+    public void CheckFeeds()
+    {
+        float now = Time.time;
+        foreach (var cam in cameras)
+        {
+            bool available = cam.receiver != null && cam.receiver.texture != null;
+            if (!lastReconnectAttempt.ContainsKey(cam))
+                lastReconnectAttempt[cam] = 0f;
+
+            if (!available)
+            {
+                if (lastReconnectAttempt[cam] + RECONNECT_INTERVAL < now)
+                {
+                    Debug.LogWarning($"NDI feed lost for {cam.sourceName}, attempting to reconnect...");
+                    lastReconnectAttempt[cam] = now;
+
+                    // Destroy the old receiver
+                    if (cam.receiver != null)
+                    {
+                        UnityEngine.Object.Destroy(cam.receiver.gameObject);
+                        cam.receiver = null;
+                    }
+
+                    // Recreate the receiver
+                    var receiverObj = new GameObject("Receiver_" + cam.sourceName);
+                    receiverObj.hideFlags = HideFlags.DontSave;
+                    cam.receiver = receiverObj.AddComponent<NdiReceiver>();
+                    cam.receiver.ndiName = cam.sourceName;
+                    if (ndiResources != null)
+                        cam.receiver.SetResources(ndiResources);
+                }
+            }
+            // Fire event if feed status changed
+            if (cam.isFeedAvailable != available)
+            {
+                cam.isFeedAvailable = available;
+                OnFeedStatusChanged?.Invoke(cam, available);
+            }
+        }
     }
 } 

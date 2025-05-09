@@ -32,51 +32,20 @@ public class GridLayoutController
     {
         if (cameraCount == 0) return;
         
-        // Determine columns and rows based on settings
-        int columns, rows;
+        // Always use manual layout mode
+        int columns = Mathf.Max(1, settings.ManualColumns);
+        int rows = Mathf.Max(1, settings.ManualRows);
         
-        if (settings.AutoLayoutGrid)
+        // Always use manual size mode
+        float cellWidth = settings.ManualCellWidth;
+        float cellHeight;
+        if (settings.MaintainAspectRatio)
         {
-            // Auto layout mode - calculate based on number of cameras
-            columns = Mathf.Min(settings.MaxAutoColumns, cameraCount);
-            rows = Mathf.CeilToInt(cameraCount / (float)columns);
-            rows = Mathf.Min(rows, settings.MaxAutoRows);
-        }
-        else
-        {
-            // Manual layout mode - use user-defined values
-            columns = Mathf.Max(1, settings.ManualColumns);
-            rows = Mathf.Max(1, settings.ManualRows);
-        }
-        
-        // Determine cell size based on settings
-        float cellWidth, cellHeight;
-        
-        if (settings.AutoSizeCells)
-        {
-            // Auto size mode - calculate based on screen size
-            float gameWidth = Screen.width;
-            float usableWidth = gameWidth - 2 * settings.Padding;
-            float totalSpacing = (columns - 1) * settings.Padding;
-            cellWidth = (usableWidth - totalSpacing) / columns;
-            float maxAllowed = (gameWidth - 2 * settings.Padding);
-            cellWidth = Mathf.Min(cellWidth, maxAllowed);
             cellHeight = cellWidth / settings.AspectRatio;
         }
         else
         {
-            // Manual size mode - use user-defined values
-            cellWidth = settings.ManualCellWidth;
-            
-            // Determine height based on aspect ratio setting
-            if (settings.MaintainAspectRatio)
-            {
-                cellHeight = cellWidth / settings.AspectRatio;
-            }
-            else
-            {
-                cellHeight = settings.ManualCellHeight;
-            }
+            cellHeight = settings.ManualCellHeight;
         }
 
         // Apply cell size and column constraint to the grid layout

@@ -79,6 +79,8 @@ public class NDIViewerApp : MonoBehaviour
         {
             tile.UpdateTexture();
         }
+        // Check and attempt to reconnect lost NDI feeds
+        cameraRegistry.CheckFeeds();
     }
     
     #region Setup Methods
@@ -529,4 +531,9 @@ public class NDIViewerApp : MonoBehaviour
     }
     
     #endregion
+    
+    public CameraRegistry GetCameraRegistry()
+    {
+        return cameraRegistry;
+    }
 } 

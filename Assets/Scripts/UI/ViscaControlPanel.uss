@@ -1,0 +1,62 @@
+/* Assets/UI/ViscaControlPanel.uss */
+/* Color Theme for VISCA Control Panel */
+:root {
+    --primary-color: #3a7ca5;      /* Blue for primary elements */
+    --secondary-color: #2f2f2f;    /* Dark gray for backgrounds */
+    --accent-color: #d9b310;       /* Gold accent for highlights */
+    --text-light: #f5f5f5;         /* Light text color */
+    --text-dark: #333333;          /* Dark text color */
+    --button-hover: #4a8cb5;       /* Slightly lighter blue for hover states */
+    --button-active: #2a6c95;      /* Darker blue for active states */
+    --panel-shadow: rgba(0, 0, 0, 0.3);  /* Shadow color */
+}
+
+.visca-panel {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--secondary-color);
+    width: 100%;
+  height:50px;
+  position:absolute;
+  bottom:20px;
+  left:0;
+  background-color:var(--secondary-color);
+}
+
+.visca-inner-panel {
+  flex-direction: row;
+  align-items: center;
+}
+
+.panel-title {
+    color: white;
+    font-size: 10px;
+}
+
+Button {
+    margin: 4px 0;
+    width:30px;
+    height: 30px;
+    font-size: 5px;
+}
+
+.pt-btn {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 4px;
+    background-color: var(--primary-color);
+    border-radius: 6px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.custom-pan-button:hover {
+    background-color: var(--button-hover);
+}
+
+.custom-pan-button:active {
+    background-color: var(--button-active);
+}

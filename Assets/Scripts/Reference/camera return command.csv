@@ -1,0 +1,5 @@
+Type,Name,Command Packet,Note
+ACK/Completion Message,ACK,z0 41 FF,Returned when the command is accepted
+ACK/Completion Message,Completion,z0 51 FF,Returned when the command has been executed
+Error Messages,Syntax Error,z0 60 02 FF,Returned when the command format is different orwhen a command with illegal command parameters is accepted
+Error Messages,Command Not Executable,z0 61 41 FF,"Returned when the command cannot be executed due to current conditions. For example, when commands controlling the focus manually are received during auto focus."

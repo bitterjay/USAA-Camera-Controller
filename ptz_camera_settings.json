@@ -1,0 +1,24 @@
+{
+    "cameras": [
+        {
+            "sourceName": "AIDA PTZ CAMERA (HX-Stream-192.168.1.103)",
+            "niceName": "AIDA PTZ CAMERA (HX-Stream-192.168.1.103)",
+            "ndiName": "",
+            "isActive": false,
+            "supportsPTZ": true,
+            "ptzAddress": "192.168.1.103",
+            "ptzPort": 52381,
+            "ptzProtocol": "VISCA"
+        },
+        {
+            "sourceName": "CAM-4 (HX-Stream-192.168.1.104)",
+            "niceName": "CAM-4 (HX-Stream-192.168.1.104)",
+            "ndiName": "",
+            "isActive": true,
+            "supportsPTZ": false,
+            "ptzAddress": "192.168.1.104",
+            "ptzPort": 52381,
+            "ptzProtocol": "VISCA"
+        }
+    ]
+}

@@ -354,6 +354,8 @@
 -analyzer:"/Applications/Unity/Hub/Editor/2022.3.15f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Scripts/Cameras/CameraInfo.cs"
 "Assets/Scripts/Cameras/CameraRegistry.cs"
+"Assets/Scripts/Cameras/ViscaCommands.cs"
+"Assets/Scripts/Cameras/ViscaOverIpSender.cs"
 "Assets/Scripts/Core/GridLayoutController.cs"
 "Assets/Scripts/Core/NDIViewerApp.cs"
 "Assets/Scripts/Settings/LayoutSettings.cs"
@@ -362,6 +364,7 @@
 "Assets/Scripts/UI/CameraTileView.cs"
 "Assets/Scripts/UI/StatusBarView.cs"
 "Assets/Scripts/UI/UIFactory.cs"
+"Assets/Scripts/UI/ViscaControlPanelController.cs"
 -langversion:9.0
 
 /deterministic

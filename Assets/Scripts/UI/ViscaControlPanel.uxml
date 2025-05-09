@@ -1,0 +1,28 @@
+<UXML xmlns:ui="UnityEngine.UIElements">
+  <Style src="ViscaControlPanel.uss"/>
+  <ui:VisualElement class="visca-panel">
+    <ui:VisualElement class="visca-inner-panel">
+      <ui:Label text="PTZ Camera Controls" class="panel-title"/>
+      <ui:VisualElement name="panRightVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Pan Right"/>
+      </ui:VisualElement>
+      <ui:VisualElement name="panLeftVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Pan Left"/>
+      </ui:VisualElement>
+      <ui:VisualElement name="tiltUpVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Tilt Up"/>
+      </ui:VisualElement>
+      <ui:VisualElement name="tiltDownVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Tilt Down"/>
+      </ui:VisualElement>
+      <ui:VisualElement name="zoomInVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Zoom In"/>
+      </ui:VisualElement>
+      <ui:VisualElement name="zoomOutVE" class="custom-pan-button pt-btn">
+        <ui:Label text="Zoom Out"/>
+      </ui:VisualElement>
+      <ui:Button name="resetButton" text="Reset" class="pt-btn"/>
+      <ui:Button name="stopButton" text="Stop" class="pt-btn"/>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</UXML>

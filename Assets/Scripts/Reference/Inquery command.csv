@@ -1,0 +1,74 @@
+Command Type,command,Return,Note
+CAM_PowerInq,8x 09 04 00 FF,y0 50 02 FF,On
+CAM_PowerInq,8x 09 04 00 FF,y0 50 03 FF,Off (Standby)
+CAM_ZoomPosInq,8x 09 04 47 FF,y0 50 0p 0q 0r 0s FF,pqrs: Zoom Position
+CAM_Focus ModeInq,8x 09 04 38 FF,y0 50 02 FF,Auto Focus
+CAM_Focus ModeInq,8x 09 04 38 FF,y0 50 03 FF,Manual Focus
+CAM_FocusPosInq,8x 09 04 48 FF,y0 50 0p 0q 0r 0s FF,pqrs: Focus Position
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 00 FF,Auto
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 01 FF,Indoor Mode
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 02 FF,Outdoor Mode
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 03 FF,OnePush Mode
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 04 FF,ATW
+CAM_WBModeInq,8x 09 04 35 FF,y0 50 05 FF,Manual
+CAM_RGainInq,8x 09 04 43 FF,y0 50 00 00 0p 0q FF,pq: R Grain
+CAM_BGainInq,8x 09 04 44 FF,y0 50 00 00 0p 0q FF,pq: B Grain
+CAM_AEModeInq,8x 09 04 39 FF,y0 50 00 FF,Full Auto
+CAM_AEModeInq,8x 09 04 39 FF,y0 50 03 FF,Manual
+CAM_AEModeInq,8x 09 04 39 FF,y0 50 0A FF,Shutter Priority
+CAM_AEModeInq,8x 09 04 39 FF,y0 50 0B FF,Iris Priority
+CAM_AEModeInq,8x 09 04 39 FF,y0 50 0D FF,Bright
+CAM_Shutter PosInq,8x 09 04 4A FF,y0 50 00 00 0p 0q FF,pq: Shutter Position
+CAM_IrisPosInq,8x 09 04 4B FF,y0 50 00 00 0p 0q FF,pq: Iris Position
+CAM_GainPosiInq,8x 09 04 4C FF,y0 50 00 00 0p 0q FF,pq: Gain Position
+CAM_ BrightPosiInq,8x 09 04 4D FF,y0 50 00 00 0p 0q FF,pq: Bright Position
+CAM_ ImageBright PosiInq,8x 09 04 A4 FF,y0 50 00 00 0p 0q FF,pq: ImageBright Position
+CAM_SaturationInq,8x 09 04 A1 FF,y0 50 00 00 0p 0q FF,pq: Saturation level 0x00~0x0f
+CAM_DefogInq,8x 09 04 A3 FF,y0 50 0p FF,p: Defog level 0x00~0x0f
+CAM_ContrastInq,8x 09 04 A2 FF,y0 50 00 00 0p 0q FF,pq: Contrast level 0x00~0x0f
+CAM_WDRModeInq,8x 09 04 3D FF,y0 50 02 FF,On
+CAM_WDRModeInq,8x 09 04 3D FF,y0 50 03 FF,Off
+CAM_WDRPosInq,8x 09 04 2D FF,8x 01 04 02 03 FF,pq: WDR LEVEL Position 1~6
+CAM_ApertureInq,8x 09 04 42 FF,y0 50 00 00 0p 0q FF,p: Aperture Gain
+CAM_FlickerInq,8x 09 04 AA FF,y0 50 0p FF,p: Flick mode 0:off 1:50Hz 2:60Hz
+CAM_2DNRInq,8x 09 04 A5 FF,y0 50 0p FF,p: 2DNR: 0=OFF 1= AUTO 2
+CAM_3DNRInq,8x 09 04 53 FF,y0 50 0p FF,p: 3DNR: 0=OFF 1= AUTO 2~5=Manual Level
+CAM_GammaInq,8x 09 04 5B FF,y0 50 0p FF,p: Gamma Position
+CAM_MemoryInq,8x 09 04 3F FF,y0 50 pp FF,pp: Memory number last operated
+SYS_MenuModeInq,8x 09 06 06 FF,y0 50 02 FF,On
+SYS_MenuModeInq,8x 09 06 06 FF,y0 50 03 FF,Off
+CAM_LR_Reverse Inq,8x 09 04 61 FF,y0 50 02 FF,On
+CAM_LR_Reverse Inq,8x 09 04 61 FF,y0 50 03 FF,Off
+CAM_PictureFlipInq,8x 09 04 66 FF,y0 50 02 FF,On
+CAM_PictureFlipInq,8x 09 04 66 FF,y0 50 03 FF,Off
+CAM_IDInq,8x 09 04 22 FF,y0 50 0p 0q 0r 0s FF,pqrs: Camera ID
+CAM_DHCPInq,8x 09 04 AE FF,y0 50 pp FF,
+CAM_IPInq,8x 09 04 AB FF,y0 50 0p 0p 0q 0q 0r 0r 0s 0s FF,
+CAM_MASKInq,8x 09 04 AC FF,y0 50 0p 0p 0q 0q 0r 0r 0s 0s FF,
+CAM_GATEWAYInq,8x 09 04 AD FF,y0 50 0p 0p 0q 0q 0r 0r 0s 0s FF,
+CAM_FlareModeInq,8x 09 04 B6 FF,y0 50 pp FF,
+CAM_FlareBright ModeInq,8x 09 04 B7 FF,y0 50 pp FF,
+CAM_FlareRed,8x 09 04 B8 FF,y0 50 pp FF,
+CAM_FlareGreen,8x 09 04 B9 FF,y0 50 pp FF,
+CAM_FlareBlue,8x 09 04 BA FF,y0 50 pp FF,
+CAM_VersionInq,8x 09 00 02 FF,y0 50 ab cd mn pq rs tu vw FF,
+VideoSystemInq (AIDA),8x 09 06 23 FF,y0 50 pp FF,pp: Video position
+VideoSystemInq (Sony),8x 09 04 24 72 FF,y0 50 0p 0p FF,pp: Video position
+IR_Transfer,8x 09 06 1A FF,y0 50 02 FF,On
+IR_Transfer,8x 09 06 1A FF,y0 50 03 FF,Off
+TallyInq,8x 09 7E 01 0A FF,y0 50 0p FF,p: tally state
+IR_Receive,8x 09 06 08 FF,y0 50 02 FF,On
+IR_Receive,8x 09 06 08 FF,y0 50 03 FF,Off
+IR_ReceiveReturn,,y0 07 7D 01 04 00 FF,Power ON/OFF
+IR_Receive,8x 09 06 08 FF,y0 07 7D 01 04 00 FF,Zoom tele/wide
+IR_Receive,8x 09 06 08 FF,y0 07 7D 01 04 07 FF,AF On/Off
+IR_Receive,8x 09 06 08 FF,y0 07 7D 01 04 33 FF,CAM_Backlight
+IR_Receive,8x 09 06 08 FF,y0 07 7D 01 04 3F FF,CAM_Memory
+IR_Receive,8x 09 06 08 FF,y0 07 7D 01 06 01 FF,Pan_tiltDrive
+Pan-tiltMaxSpeed Inq,8x 09 06 11 FF,y0 50 ww zz FF,ww: PanMaxSpeed zz: Tilt Max Speed
+Pan-tiltPosInq,8x 09 06 12 FF,y0 50 0w 0w 0w 0w 0z 0z 0z 0z FF,wwww: PanPosition zzzz: Tilt Position
+Mainstream ResolutionInq,8x 09 04 C2 00 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrs : Column(x size) mnxy: Line (y size) only supports: 1920x1080
+MainstreamRate Inq,8x 09 04 C2 01 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrsmnxy: bitrate (0~15360)
+Substream ResolutionInq,8x 09 04 C3 00 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,"pqrs : Column(x size) mnxy: Line (y size)
+only supports: 1280x720/1024x576/640x360"
+SubstreamRateInq,8x 09 04 C3 01 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrsmnxy: bitrate (0~15360)
