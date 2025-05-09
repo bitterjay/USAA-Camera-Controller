@@ -11,6 +11,11 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class NDIViewerApp : MonoBehaviour
 {
+    // Static global variable to store active camera IP and port for debugging
+    public static string ActiveCameraIP { get; private set; } = "Not Set";
+    public static int ActiveCameraPort { get; private set; } = 0;
+    public static string ActiveCameraName { get; private set; } = "None";
+
     [Header("Settings")]
     [SerializeField] private LayoutSettings layoutSettings;
     
@@ -79,8 +84,12 @@ public class NDIViewerApp : MonoBehaviour
         {
             tile.UpdateTexture();
         }
+        
         // Check and attempt to reconnect lost NDI feeds
         cameraRegistry.CheckFeeds();
+        
+        // Verify that the active camera's IP matches what we expect based on its name
+        VerifyActiveCameraIP();
     }
     
     #region Setup Methods
@@ -177,6 +186,48 @@ public class NDIViewerApp : MonoBehaviour
     
     private void OnCameraAdded(CameraInfo camera)
     {
+        // Assign different VISCA IPs based on camera name
+        string nameLower = camera.niceName.ToLower();
+        
+        // Improved detection for camera naming patterns - handle CAM1, CAM-1, Camera 1, etc.
+        bool isCam1 = nameLower.Contains("cam1") || nameLower.Contains("cam-1") || nameLower.Contains("cam 1") || nameLower.Contains("camera1") || nameLower.Contains("camera 1") || nameLower.Contains("camera-1");
+        bool isCam2 = nameLower.Contains("cam2") || nameLower.Contains("cam-2") || nameLower.Contains("cam 2") || nameLower.Contains("camera2") || nameLower.Contains("camera 2") || nameLower.Contains("camera-2");
+        bool isCam3 = nameLower.Contains("cam3") || nameLower.Contains("cam-3") || nameLower.Contains("cam 3") || nameLower.Contains("camera3") || nameLower.Contains("camera 3") || nameLower.Contains("camera-3");
+        bool isCam4 = nameLower.Contains("cam4") || nameLower.Contains("cam-4") || nameLower.Contains("cam 4") || nameLower.Contains("camera4") || nameLower.Contains("camera 4") || nameLower.Contains("camera-4");
+        
+        if (isCam1)
+        {
+            camera.viscaIp = "192.168.1.101";
+            Debug.Log($"Assigning IP 192.168.1.101 to camera {camera.niceName}");
+        }
+        else if (isCam2)
+        {
+            camera.viscaIp = "192.168.1.102";
+            Debug.Log($"Assigning IP 192.168.1.102 to camera {camera.niceName}");
+        }
+        else if (isCam3)
+        {
+            camera.viscaIp = "192.168.1.103";
+            Debug.Log($"Assigning IP 192.168.1.103 to camera {camera.niceName}");
+        }
+        else if (isCam4)
+        {
+            camera.viscaIp = "192.168.1.104";
+            Debug.Log($"Assigning IP 192.168.1.104 to camera {camera.niceName}");
+        }
+        else
+        {
+            // Default IP for unrecognized cameras
+            camera.viscaIp = "192.168.1.100";
+            Debug.Log($"⚠️ Unrecognized camera name pattern: {camera.niceName}, assigning default IP 192.168.1.100");
+        }
+        
+        // Force update the global tracker to ensure we're using the correct IP
+        if (camera.isActive)
+        {
+            UpdateGlobalCameraInfo(camera);
+        }
+        
         // Create tile and add to dictionary
         CreateCameraTile(camera);
         
@@ -250,6 +301,26 @@ public class NDIViewerApp : MonoBehaviour
     private void OnCameraTileSelected(CameraTileView tile)
     {
         SetActiveCamera(tile.CameraInfo);
+        
+        // Update global tracking variables
+        UpdateGlobalCameraInfo(tile.CameraInfo);
+    }
+    
+    // Helper method to update global tracking variables
+    private void UpdateGlobalCameraInfo(CameraInfo camera)
+    {
+        if (camera != null)
+        {
+            ActiveCameraIP = camera.viscaIp;
+            ActiveCameraPort = camera.viscaPort;
+            ActiveCameraName = camera.niceName;
+        }
+        else
+        {
+            ActiveCameraIP = "Not Set";
+            ActiveCameraPort = 0;
+            ActiveCameraName = "None";
+        }
     }
     
     private void OnCameraDisplayNameChanged(CameraInfo camera, string newName)
@@ -265,6 +336,12 @@ public class NDIViewerApp : MonoBehaviour
         
         // Update settings panel if open
         RefreshSettingsList();
+        
+        // Update global tracking if this is the active camera
+        if (camera.isActive)
+        {
+            ActiveCameraName = newName;
+        }
     }
     
     private void SetActiveCamera(CameraInfo camera)
@@ -275,7 +352,14 @@ public class NDIViewerApp : MonoBehaviour
         // Update tile visuals
         foreach (var kvp in cameraTiles)
         {
-            kvp.Value.SetActive(kvp.Key == camera);
+            bool isThisCamera = kvp.Key == camera;
+            kvp.Value.SetActive(isThisCamera);
+            
+            // If this is becoming the active camera, update global tracking
+            if (isThisCamera)
+            {
+                UpdateGlobalCameraInfo(camera);
+            }
         }
         
         // Update status bar
@@ -531,6 +615,52 @@ public class NDIViewerApp : MonoBehaviour
     }
     
     #endregion
+    
+    // New helper method to verify and fix the active camera IP if needed
+    private void VerifyActiveCameraIP()
+    {
+        // Only check if we have an active camera
+        CameraInfo activeCamera = cameraRegistry?.ActiveCamera;
+        if (activeCamera == null) return;
+        
+        string expectedIP = null;
+        string nameLower = activeCamera.niceName.ToLower();
+        
+        // Determine expected IP based on camera name
+        if (nameLower.Contains("cam1") || nameLower.Contains("cam-1") || nameLower.Contains("cam 1"))
+            expectedIP = "192.168.1.101";
+        else if (nameLower.Contains("cam2") || nameLower.Contains("cam-2") || nameLower.Contains("cam 2"))
+            expectedIP = "192.168.1.102";
+        else if (nameLower.Contains("cam3") || nameLower.Contains("cam-3") || nameLower.Contains("cam 3"))
+            expectedIP = "192.168.1.103";
+        else if (nameLower.Contains("cam4") || nameLower.Contains("cam-4") || nameLower.Contains("cam 4"))
+            expectedIP = "192.168.1.104";
+        
+        // If we could determine an expected IP and it doesn't match current IP
+        if (expectedIP != null && activeCamera.viscaIp != expectedIP)
+        {
+            Debug.LogWarning($"⚠️ IP MISMATCH DETECTED: Camera {activeCamera.niceName} should use IP {expectedIP} but is using {activeCamera.viscaIp}");
+            
+            // Fix the IP address
+            int currentPort = activeCamera.viscaPort; // Save current port
+            
+            Debug.Log($"🔄 AUTO-CORRECTING IP: Changing {activeCamera.niceName} from {activeCamera.viscaIp} to {expectedIP}");
+            activeCamera.viscaIp = expectedIP;
+            
+            // Update the VISCA controller
+            var viscaController = FindObjectOfType<ViscaControlPanelController>();
+            if (viscaController != null)
+            {
+                viscaController.SetIPAddress(expectedIP);
+            }
+            
+            // Update global tracker
+            UpdateGlobalCameraInfo(activeCamera);
+            
+            // Notify listeners of the change
+            cameraRegistry.UpdateCameraConnection(activeCamera, expectedIP, currentPort);
+        }
+    }
     
     public CameraRegistry GetCameraRegistry()
     {

@@ -11,6 +11,8 @@ public class CameraSettingsPopup : MonoBehaviour
 {
     // References to UI elements
     private InputField nameInputField;
+    private InputField ipAddressInputField;
+    private InputField portInputField;
     private Button saveButton;
     private Text ndiNameLabel;
     
@@ -19,9 +21,17 @@ public class CameraSettingsPopup : MonoBehaviour
     
     // Event fired when changes are saved
     public event Action<string> OnSaveChanges;
+    public event Action<string, int> OnConnectionChanged;
     
     // Reference to the overlay object
     private GameObject overlayObject;
+    
+    // We'll add fields for VISCA IP and port settings
+    private InputField viscaIpInput;
+    private InputField viscaPortInput;
+    
+    // Reference to the registry for updating connection settings
+    private CameraRegistry cameraRegistry;
     
     /// <summary>
     /// Initialize the popup with camera data
@@ -54,6 +64,8 @@ public class CameraSettingsPopup : MonoBehaviour
         // Set initial values
         nameInputField.text = cameraInfo.niceName;
         ndiNameLabel.text = cameraInfo.sourceName;
+        ipAddressInputField.text = cameraInfo.viscaIp;
+        portInputField.text = cameraInfo.viscaPort.ToString();
     }
     
     /// <summary>
@@ -185,6 +197,58 @@ public class CameraSettingsPopup : MonoBehaviour
         // Create input field
         CreateInputField(displayNameContainer.transform);
         
+        // VISCA IP section - container
+        var viscaIpContainer = new GameObject("ViscaIpContainer", typeof(RectTransform));
+        viscaIpContainer.transform.SetParent(parent, false);
+        var viscaIpVLayout = viscaIpContainer.AddComponent<VerticalLayoutGroup>();
+        viscaIpVLayout.childAlignment = TextAnchor.UpperCenter;
+        viscaIpVLayout.spacing = 5f;
+        viscaIpVLayout.padding = new RectOffset(0, 0, 5, 5);
+        
+        // VISCA IP label
+        var viscaIpTitleObj = new GameObject("ViscaIpTitle", typeof(RectTransform));
+        viscaIpTitleObj.transform.SetParent(viscaIpContainer.transform, false);
+        var viscaIpTitle = viscaIpTitleObj.AddComponent<Text>();
+        viscaIpTitle.text = "VISCA IP Address:";
+        viscaIpTitle.font = UIFactory.BuiltinFont;
+        viscaIpTitle.fontSize = 12;
+        viscaIpTitle.alignment = TextAnchor.UpperCenter;
+        viscaIpTitle.color = new Color(0.7f, 0.7f, 0.7f);
+        
+        // Add layout element
+        var viscaIpTitleLayout = viscaIpTitleObj.AddComponent<LayoutElement>();
+        viscaIpTitleLayout.minHeight = 20;
+        viscaIpTitleLayout.preferredHeight = 20;
+        
+        // Create IP input field
+        CreateViscaIpField(viscaIpContainer.transform);
+        
+        // VISCA Port section - container
+        var viscaPortContainer = new GameObject("ViscaPortContainer", typeof(RectTransform));
+        viscaPortContainer.transform.SetParent(parent, false);
+        var viscaPortVLayout = viscaPortContainer.AddComponent<VerticalLayoutGroup>();
+        viscaPortVLayout.childAlignment = TextAnchor.UpperCenter;
+        viscaPortVLayout.spacing = 5f;
+        viscaPortVLayout.padding = new RectOffset(0, 0, 5, 5);
+        
+        // VISCA Port label
+        var viscaPortTitleObj = new GameObject("ViscaPortTitle", typeof(RectTransform));
+        viscaPortTitleObj.transform.SetParent(viscaPortContainer.transform, false);
+        var viscaPortTitle = viscaPortTitleObj.AddComponent<Text>();
+        viscaPortTitle.text = "VISCA Port:";
+        viscaPortTitle.font = UIFactory.BuiltinFont;
+        viscaPortTitle.fontSize = 12;
+        viscaPortTitle.alignment = TextAnchor.UpperCenter;
+        viscaPortTitle.color = new Color(0.7f, 0.7f, 0.7f);
+        
+        // Add layout element
+        var viscaPortTitleLayout = viscaPortTitleObj.AddComponent<LayoutElement>();
+        viscaPortTitleLayout.minHeight = 20;
+        viscaPortTitleLayout.preferredHeight = 20;
+        
+        // Create Port input field
+        CreateViscaPortField(viscaPortContainer.transform);
+        
         // Add a spacer that will push the save button to the bottom
         var spacerObj = new GameObject("Spacer", typeof(RectTransform));
         spacerObj.transform.SetParent(parent, false);
@@ -249,6 +313,101 @@ public class CameraSettingsPopup : MonoBehaviour
         phRT.offsetMax = new Vector2(-5, 0);
     }
     
+    private void CreateViscaIpField(Transform parent)
+    {
+        // Create label
+        var labelObj = new GameObject("IPLabel", typeof(RectTransform));
+        labelObj.transform.SetParent(parent, false);
+        var labelText = labelObj.AddComponent<Text>();
+        labelText.text = "VISCA IP Address:";
+        labelText.font = UIFactory.BuiltinFont;
+        labelText.fontSize = 16;
+        labelText.color = Color.white;
+        var labelRT = labelObj.GetComponent<RectTransform>();
+        labelRT.sizeDelta = new Vector2(150, 24);
+        
+        // Create input field
+        var inputObj = new GameObject("IPInput", typeof(RectTransform), typeof(Image));
+        inputObj.transform.SetParent(parent, false);
+        var inputImage = inputObj.GetComponent<Image>();
+        inputImage.color = new Color(0.2f, 0.2f, 0.2f);
+        
+        // viscaIpInput = inputObj.AddComponent<InputField>();
+        // viscaIpInput.textComponent = UIFactory.CreateTextComponent(inputObj.transform);
+        // viscaIpInput.textComponent.color = Color.white;
+        // viscaIpInput.textComponent.font = UIFactory.BuiltinFont;
+        // viscaIpInput.textComponent.fontSize = 16;
+        // viscaIpInput.textComponent.alignment = TextAnchor.MiddleLeft;
+        
+        // Add placeholder
+        var placeholder = new GameObject("Placeholder", typeof(RectTransform));
+        placeholder.transform.SetParent(inputObj.transform, false);
+        var placeholderText = placeholder.AddComponent<Text>();
+        placeholderText.text = "192.168.1.100";
+        placeholderText.font = UIFactory.BuiltinFont;
+        placeholderText.fontSize = 16;
+        placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
+        placeholderText.alignment = TextAnchor.MiddleLeft;
+        var placeholderRT = placeholder.GetComponent<RectTransform>();
+        placeholderRT.anchorMin = Vector2.zero;
+        placeholderRT.anchorMax = Vector2.one;
+        placeholderRT.offsetMin = new Vector2(8, 0);
+        placeholderRT.offsetMax = Vector2.zero;
+        
+        viscaIpInput.placeholder = placeholderText;
+        
+        var inputRT = inputObj.GetComponent<RectTransform>();
+        inputRT.sizeDelta = new Vector2(180, 26);
+    }
+    
+    private void CreateViscaPortField(Transform parent)
+    {
+        // Create label
+        var labelObj = new GameObject("PortLabel", typeof(RectTransform));
+        labelObj.transform.SetParent(parent, false);
+        var labelText = labelObj.AddComponent<Text>();
+        labelText.text = "VISCA Port:";
+        labelText.font = UIFactory.BuiltinFont;
+        labelText.fontSize = 16;
+        labelText.color = Color.white;
+        var labelRT = labelObj.GetComponent<RectTransform>();
+        labelRT.sizeDelta = new Vector2(150, 24);
+        
+        // Create input field
+        var inputObj = new GameObject("PortInput", typeof(RectTransform), typeof(Image));
+        inputObj.transform.SetParent(parent, false);
+        var inputImage = inputObj.GetComponent<Image>();
+        inputImage.color = new Color(0.2f, 0.2f, 0.2f);
+        
+        // viscaPortInput = inputObj.AddComponent<InputField>();
+        // viscaPortInput.textComponent = UIFactory.CreateTextComponent(inputObj.transform);
+        // viscaPortInput.textComponent.color = Color.white;
+        // viscaPortInput.textComponent.font = UIFactory.BuiltinFont;
+        // viscaPortInput.textComponent.fontSize = 16;
+        // viscaPortInput.textComponent.alignment = TextAnchor.MiddleLeft;
+        
+        // Add placeholder
+        var placeholder = new GameObject("Placeholder", typeof(RectTransform));
+        placeholder.transform.SetParent(inputObj.transform, false);
+        var placeholderText = placeholder.AddComponent<Text>();
+        placeholderText.text = "52381";
+        placeholderText.font = UIFactory.BuiltinFont;
+        placeholderText.fontSize = 16;
+        placeholderText.color = new Color(0.5f, 0.5f, 0.5f);
+        placeholderText.alignment = TextAnchor.MiddleLeft;
+        var placeholderRT = placeholder.GetComponent<RectTransform>();
+        placeholderRT.anchorMin = Vector2.zero;
+        placeholderRT.anchorMax = Vector2.one;
+        placeholderRT.offsetMin = new Vector2(8, 0);
+        placeholderRT.offsetMax = Vector2.zero;
+        
+        viscaPortInput.placeholder = placeholderText;
+        viscaPortInput.contentType = InputField.ContentType.IntegerNumber;
+        
+        var inputRT = inputObj.GetComponent<RectTransform>();
+        inputRT.sizeDelta = new Vector2(180, 26);
+    }
+    
     private void CreateSaveButton(Transform parent)
     {
         var btnObj = new GameObject("SaveButton", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -292,8 +451,52 @@ public class CameraSettingsPopup : MonoBehaviour
         // Get the new name from the input field
         string newName = nameInputField.text.Trim();
         
-        // Trigger the save event
+        // Get new connection settings
+        string newIp = viscaIpInput.text.Trim();
+        string portStr = viscaPortInput.text.Trim();
+        int newPort = 52381;  // default port
+        
+        bool validPort = int.TryParse(portStr, out newPort);
+        if (!validPort)
+        {
+            Debug.LogWarning("Invalid port number entered, using default 52381");
+            newPort = 52381;
+        }
+        
+        // Check if IP is valid format
+        if (string.IsNullOrEmpty(newIp))
+        {
+            Debug.LogWarning("Empty IP address, using default");
+            newIp = "192.168.1.104";
+        }
+        
+        // Trigger the save event for the name
         OnSaveChanges?.Invoke(newName);
+        
+        // Trigger connection changed event if IP or port changed
+        if (newIp != cameraInfo.viscaIp || newPort != cameraInfo.viscaPort)
+        {
+            Debug.Log($"Connection settings changed for {cameraInfo.niceName}: IP {cameraInfo.viscaIp} -> {newIp}, Port {cameraInfo.viscaPort} -> {newPort}");
+            OnConnectionChanged?.Invoke(newIp, newPort);
+            
+            // Update the camera registry directly
+            var registry = UnityEngine.Object.FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+            if (registry != null)
+            {
+                registry.UpdateCameraConnection(cameraInfo, newIp, newPort);
+            }
+            
+            // Update the controller if this is the active camera
+            if (cameraInfo.isActive)
+            {
+                var controller = UnityEngine.Object.FindObjectOfType<ViscaControlPanelController>();
+                if (controller != null)
+                {
+                    controller.SetIPAddress(newIp);
+                    controller.SetPort(newPort);
+                }
+            }
+        }
         
         // Close the popup
         if (overlayObject != null)

@@ -1,2 +1,44 @@
-Logs/
-AssetImportWorker0-prev.log 
+# Unity specific ignores
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Asset meta data should only be ignored when the corresponding asset is also ignored
+!/[Aa]ssets/**/*.meta
+
+# Visual Studio / VS Code cache directory
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.booproj
+*.svd
+
+# Mac OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Crashlytics generated file
+Assets/StreamingAssets/crashlytics-build.properties
+
+# Specifically exclude large log files
+**/AssetImportWorker*.log
+**/shadercompiler*.log 

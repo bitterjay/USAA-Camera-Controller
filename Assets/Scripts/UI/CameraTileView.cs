@@ -120,6 +120,12 @@ public class CameraTileView : MonoBehaviour
         
         IsActive = active;
         CameraInfo.isActive = active;
+
+        Debug.Log($"SetActive called for camera {CameraInfo.niceName} - Active: {active}");
+        
+        // Debug info about the camera
+        Debug.Log($"Camera info - NiceName: {CameraInfo.niceName}, Source: {CameraInfo.sourceName}");
+        Debug.Log($"Camera VISCA settings - IP: {CameraInfo.viscaIp}, Port: {CameraInfo.viscaPort}");
         
         // Update border color based on active state
         if (borderImage != null)
@@ -127,6 +133,23 @@ public class CameraTileView : MonoBehaviour
             borderImage.color = active 
                 ? layoutSettings.ActiveTileBorderColor 
                 : layoutSettings.TileBorderColor;
+        }
+        
+        // We don't need to directly manipulate the VISCA control panel anymore
+        // The camera selection event in CameraRegistry will handle this
+        if (active)
+        {
+            // Find the camera registry
+            var ndiApp = FindObjectOfType<NDIViewerApp>();
+            if (ndiApp != null)
+            {
+                var registry = ndiApp.GetCameraRegistry();
+                if (registry != null)
+                {
+                    // This will trigger the OnCameraSelected event which the ViscaController listens to
+                    registry.SetActiveCamera(CameraInfo);
+                }
+            }
         }
     }
     
@@ -223,8 +246,8 @@ public class CameraTileView : MonoBehaviour
         colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
         button.colors = colors;
         
-        // Set click handler
-        button.onClick.AddListener(() => OnSelected?.Invoke(this));
+        // Initialize our click handler
+        InitializeClickHandler();
     }
     
     private void AddSettingsButton()
@@ -329,6 +352,51 @@ public class CameraTileView : MonoBehaviour
         if (displayNameText != null)
         {
             displayNameText.text = newName;
+        }
+    }
+
+    // Add this method to directly handle the camera tile click
+    private void InitializeClickHandler()
+    {
+        var button = GetComponent<Button>();
+        if (button != null)
+        {
+            // Clear any existing listeners to avoid duplicates
+            button.onClick.RemoveAllListeners();
+            
+            // Add our click handler
+            button.onClick.AddListener(() => {
+                Debug.Log($"⭐⭐⭐ CAMERA TILE CLICKED: {CameraInfo.niceName} ⭐⭐⭐");
+                Debug.Log($"⭐⭐⭐ VISCA IP: {CameraInfo.viscaIp}, PORT: {CameraInfo.viscaPort} ⭐⭐⭐");
+                
+                // Find the camera registry and set active camera
+                var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+                if (registry != null)
+                {
+                    Debug.Log($"Setting active camera via registry: {CameraInfo.niceName}");
+                    registry.SetActiveCamera(CameraInfo);
+                }
+                else
+                {
+                    Debug.LogError("Could not find NDIViewerApp or CameraRegistry!");
+                    
+                    // Fallback: Try to update the controller directly
+                    var viscaController = FindObjectOfType<ViscaControlPanelController>();
+                    if (viscaController != null)
+                    {
+                        Debug.Log($"Fallback: Setting active camera directly on controller");
+                        viscaController.SetIPAddress(CameraInfo.viscaIp);
+                        viscaController.SetPort(CameraInfo.viscaPort);
+                    }
+                    else
+                    {
+                        Debug.LogError("CRITICAL ERROR: No way to update active camera found!");
+                    }
+                }
+                
+                // Call any additional listeners
+                OnSelected?.Invoke(this);
+            });
         }
     }
 } 

@@ -131,26 +131,16 @@ public class ViscaOverIpSender : System.IDisposable
 
     private async Task SendPacketAsync(byte[] packet)
     {
-        Debug.Log("--------------------------------");
-        Debug.Log($"VISCA SEND - Starting send process");
-        Debug.Log($"Current IP/Port: {_cameraIp}:{_cameraPort}");
-        Debug.Log($"GLOBAL TRACKER: Active camera is {NDIViewerApp.ActiveCameraName} with IP {NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort}");
-        
         // SAFETY CHECK: Verify IP address matches the global tracker
         bool ipMismatch = _cameraIp != NDIViewerApp.ActiveCameraIP && !string.IsNullOrEmpty(NDIViewerApp.ActiveCameraIP) && NDIViewerApp.ActiveCameraIP != "Not Set";
         bool portMismatch = _cameraPort != NDIViewerApp.ActiveCameraPort && NDIViewerApp.ActiveCameraPort != 0;
         
         if (ipMismatch || portMismatch)
         {
-            Debug.LogError($"⚠️ CRITICAL SAFETY CHECK: Attempted to send VISCA command to {_cameraIp}:{_cameraPort} but active camera is {NDIViewerApp.ActiveCameraName} with IP {NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort}");
+            Debug.LogError($"IP MISMATCH: Using {_cameraIp}:{_cameraPort} but active camera is {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
             
             // Auto-correct the connection details
-            Debug.Log($"🛡️ AUTO-CORRECTING CONNECTION: Changing from {_cameraIp}:{_cameraPort} to {NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort}");
             UpdateConnection(NDIViewerApp.ActiveCameraIP, NDIViewerApp.ActiveCameraPort);
-            
-            // Log call stack to help debug
-            System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace(true);
-            Debug.Log($"Call stack for safety correction:\n{stackTrace}");
         }
         
         // Validate client and endpoint
@@ -166,42 +156,22 @@ public class ViscaOverIpSender : System.IDisposable
             return;
         }
         
-        // CRITICAL: Make sure the endpoint has the correct IP & port
-        Debug.Log($"Current endpoint is: {endPoint.Address}:{endPoint.Port}");
-        
+        // Check if endpoint needs updating
         if (endPoint.Address.ToString() != _cameraIp || endPoint.Port != _cameraPort)
         {
-            Debug.LogError($"ENDPOINT MISMATCH: Endpoint {endPoint.Address}:{endPoint.Port} doesn't match current IP {_cameraIp}:{_cameraPort}");
-            Debug.LogError($"GLOBAL TRACKER says active camera should be: {NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort}");
-            Debug.Log("Recreating endpoint with correct IP and port");
-            try {
-                CreateEndPoint();
-                Debug.Log($"Endpoint recreated - new endpoint: {endPoint.Address}:{endPoint.Port}");
-            }
-            catch (System.Exception ex) {
-                Debug.LogError($"Failed to recreate endpoint: {ex.Message}");
-                return;
-            }
+            Debug.LogError($"Endpoint mismatch: Endpoint {endPoint.Address}:{endPoint.Port} doesn't match {_cameraIp}:{_cameraPort}");
+            CreateEndPoint();
         }
 
         try
         {
             string packetHex = System.BitConverter.ToString(packet);
-            Debug.Log($"📡 Sending VISCA packet to {_cameraIp}:{_cameraPort} - Data: {packetHex}");
-            Debug.Log($"📡 GLOBAL TRACKER says active camera is: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
-            
-            // Always log the call path for sends
-            System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace();
-            Debug.Log($"VISCA packet call path: {stackTrace.ToString()}");
-            
             await udpClient.SendAsync(packet, packet.Length, endPoint);
-            Debug.Log($"VISCA packet sent successfully: {packetHex}");
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"VISCA send error: {ex.Message}\nStack trace: {ex.StackTrace}");
+            Debug.LogError($"VISCA send error: {ex.Message}");
         }
-        Debug.Log("--------------------------------");
     }
 
     public void Dispose()

@@ -233,6 +233,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb83d1997cd0448e6bff3703edbbf786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  theViscaIp: 192.168.1.104
+  theViscaPort: 52381
+  defaultViscaIp: 192.168.1.103
+  defaultViscaPort: 52381
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

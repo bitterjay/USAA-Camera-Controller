@@ -57,15 +57,7 @@ public class CameraInfo
         { 
             if (_viscaIp != value) 
             {
-                Debug.Log($"Camera {niceName} - VISCA IP changed from {_viscaIp} to {value}");
-                
-                // Check if this is the active camera by comparing to global tracker
-                if (isActive || (niceName == NDIViewerApp.ActiveCameraName))
-                {
-                    Debug.Log($"🌟 ACTIVE CAMERA IP CHANGING: {_viscaIp} -> {value}");
-                    Debug.Log($"🌟 GLOBAL TRACKER currently has: {NDIViewerApp.ActiveCameraIP}");
-                }
-                
+                // Log removed for clean debug output
                 _viscaIp = value; 
             }
         }
@@ -84,15 +76,7 @@ public class CameraInfo
         { 
             if (_viscaPort != value) 
             {
-                Debug.Log($"Camera {niceName} - VISCA port changed from {_viscaPort} to {value}");
-                
-                // Check if this is the active camera by comparing to global tracker
-                if (isActive || (niceName == NDIViewerApp.ActiveCameraName))
-                {
-                    Debug.Log($"🌟 ACTIVE CAMERA PORT CHANGING: {_viscaPort} -> {value}");
-                    Debug.Log($"🌟 GLOBAL TRACKER currently has: {NDIViewerApp.ActiveCameraPort}");
-                }
-                
+                // Log removed for clean debug output
                 _viscaPort = value; 
             }
         }

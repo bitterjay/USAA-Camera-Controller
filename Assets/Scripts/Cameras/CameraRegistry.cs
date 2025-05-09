@@ -192,13 +192,9 @@ public class CameraRegistry
         if (camera != null)
         {
             camera.isActive = true;
-            Debug.Log($"CameraRegistry.SetActiveCamera: {camera.niceName} with IP {camera.viscaIp}:{camera.viscaPort}");
-            Debug.Log($"CameraRegistry: GLOBAL TRACKER before event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
             
             // Trigger the camera selected event
             OnCameraSelected?.Invoke(camera);
-            
-            Debug.Log($"CameraRegistry: GLOBAL TRACKER after event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
         }
     }
     
@@ -287,19 +283,13 @@ public class CameraRegistry
         if (camera == null)
             return;
             
-        Debug.Log($"Updating camera {camera.niceName} connection settings - IP: {viscaIp}, Port: {viscaPort}");
-        Debug.Log($"CameraRegistry.UpdateCameraConnection: GLOBAL TRACKER currently says: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
-        
         camera.viscaIp = viscaIp;
         camera.viscaPort = viscaPort;
         
         // If this is the active camera, make sure to refresh the controller
         if (camera.isActive)
         {
-            Debug.Log($"Active camera connection updated - Triggering camera selected event");
             OnCameraSelected?.Invoke(camera);
-            
-            Debug.Log($"CameraRegistry: GLOBAL TRACKER after event: {NDIViewerApp.ActiveCameraName} ({NDIViewerApp.ActiveCameraIP}:{NDIViewerApp.ActiveCameraPort})");
         }
     }
 } 
