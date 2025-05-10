@@ -5,6 +5,10 @@ public class GamepadCameraCycler : MonoBehaviour
 {
     private InputActions inputActions;
     private CameraRegistry cameraRegistry;
+    private ViscaControlPanelController viscaController;
+    private Vector2 lastMoveDirection = Vector2.zero;
+    private bool isMoving = false;
+    private const float DEADZONE = 0.3f;
 
     private void Awake()
     {
@@ -20,6 +24,7 @@ public class GamepadCameraCycler : MonoBehaviour
 
         // Get the CameraRegistry instance from the NDIViewerApp
         cameraRegistry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+        viscaController = FindObjectOfType<ViscaControlPanelController>();
     }
 
     private void OnDisable()
@@ -37,6 +42,47 @@ public class GamepadCameraCycler : MonoBehaviour
     private void OnSelectRightCamera(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
         CycleCamera(1);
+    }
+
+    private void Update()
+    {
+        if (viscaController == null)
+            viscaController = FindObjectOfType<ViscaControlPanelController>();
+
+        Vector2 move = inputActions.GameController.moveCamera.ReadValue<Vector2>();
+        if (move.magnitude > DEADZONE)
+        {
+            Vector2 direction = new Vector2(Mathf.Round(move.x), Mathf.Round(move.y));
+            if (direction != lastMoveDirection)
+            {
+                lastMoveDirection = direction;
+                isMoving = true;
+                // Diagonal
+                if (direction.x < 0 && direction.y > 0)
+                    viscaController?.PanTiltUpLeft();
+                else if (direction.x > 0 && direction.y > 0)
+                    viscaController?.PanTiltUpRight();
+                else if (direction.x < 0 && direction.y < 0)
+                    viscaController?.PanTiltDownLeft();
+                else if (direction.x > 0 && direction.y < 0)
+                    viscaController?.PanTiltDownRight();
+                // Cardinal
+                else if (direction.x < 0)
+                    viscaController?.PanLeft();
+                else if (direction.x > 0)
+                    viscaController?.PanRight();
+                else if (direction.y > 0)
+                    viscaController?.TiltUp();
+                else if (direction.y < 0)
+                    viscaController?.TiltDown();
+            }
+        }
+        else if (isMoving)
+        {
+            isMoving = false;
+            lastMoveDirection = Vector2.zero;
+            viscaController?.Stop();
+        }
     }
 
     private void CycleCamera(int direction)
@@ -88,7 +134,7 @@ public class GamepadCameraCycler : MonoBehaviour
         }
 
         // Trigger VISCA logic
-        var viscaController = FindObjectOfType<ViscaControlPanelController>();
+        viscaController = FindObjectOfType<ViscaControlPanelController>();
         if (viscaController != null)
         {
             viscaController.OnCameraSelected(cameras[newIndex]);

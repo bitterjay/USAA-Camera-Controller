@@ -1131,6 +1131,17 @@ public class ViscaControlPanelController : MonoBehaviour
             }
         }
     }
+
+    // Public PTZ control methods for gamepad support
+    public async void PanLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanLeft(); }
+    public async void PanRight() { if (isInitialized && viscaSender != null) await viscaSender.PanRight(); }
+    public async void TiltUp() { if (isInitialized && viscaSender != null) await viscaSender.TiltUp(); }
+    public async void TiltDown() { if (isInitialized && viscaSender != null) await viscaSender.TiltDown(); }
+    public async void PanTiltUpLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpLeft(); }
+    public async void PanTiltUpRight() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpRight(); }
+    public async void PanTiltDownLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownLeft(); }
+    public async void PanTiltDownRight() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownRight(); }
+    public async void Stop() { if (isInitialized && viscaSender != null) await viscaSender.Stop(); }
 }
 
 public static class TaskExtensions
