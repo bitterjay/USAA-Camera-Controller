@@ -10,7 +10,7 @@ using System;
 public class CameraRegistry
 {
     // List of available cameras
-    private readonly List<CameraInfo> cameras = new List<CameraInfo>();
+    public List<CameraInfo> cameras = new List<CameraInfo>();
     
     // NDI Resources
     private NdiResources ndiResources;
@@ -70,12 +70,14 @@ public class CameraRegistry
         foreach (var sourceName in NdiFinder.sourceNames)
         {
             AddCamera(sourceName, sourceName);
+            Debug.Log($"Added camera: {sourceName}");
         }
         
         // Set the first camera as active if we have any
         if (cameras.Count > 0)
         {
             SetActiveCamera(cameras[0]);
+            Debug.Log($"First camera: {cameras[0].niceName} (source: {cameras[0].sourceName})");
         }
     }
     
@@ -182,27 +184,16 @@ public class CameraRegistry
     /// <param name="camera">The camera to activate</param>
     public void SetActiveCamera(CameraInfo camera)
     {
-        // Deactivate all cameras
-        foreach (var cam in cameras)
-        {
-            cam.isActive = false;
-        }
-        
-        // Activate the specified camera
-        if (camera != null)
-        {
-            camera.isActive = true;
-            
-            // Trigger the camera selected event
-            OnCameraSelected?.Invoke(camera);
+        Debug.Log($"Setting active camera: {(camera != null ? camera.niceName : "null")}");
+
+        var viscaController = UnityEngine.Object.FindObjectOfType<ViscaControlPanelController>();
+        if (viscaController != null) {
+            viscaController.InitializePTZControls(camera);
+        } else {
+            Debug.LogWarning("ViscaControlPanelController not found in scene");
         }
     }
-    
-    /// <summary>
-    /// Changes the display name of a camera
-    /// </summary>
-    /// <param name="camera">The camera to update</param>
-    /// <param name="newName">The new display name</param>
+   
     public void UpdateCameraName(CameraInfo camera, string newName)
     {
         if (camera != null)
@@ -278,13 +269,12 @@ public class CameraRegistry
     /// <param name="camera">The camera to update</param>
     /// <param name="viscaIp">New VISCA IP address</param>
     /// <param name="viscaPort">New VISCA port</param>
-    public void UpdateCameraConnection(CameraInfo camera, string viscaIp, int viscaPort)
+    public void UpdateCameraConnection(CameraInfo camera, string viscaIp)
     {
         if (camera == null)
             return;
             
         camera.viscaIp = viscaIp;
-        camera.viscaPort = viscaPort;
         
         // If this is the active camera, make sure to refresh the controller
         if (camera.isActive)

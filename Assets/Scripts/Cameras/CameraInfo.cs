@@ -44,24 +44,13 @@ public class CameraInfo
     public bool isFeedAvailable;
 
     // IP address backing field
-    private string _viscaIp = "192.168.1.104";
+    // private string _viscaIp = "192.168.1.104";
     
     
     /// <summary>
     /// VISCA IP address for this camera
     /// </summary>
-    public string viscaIp 
-    { 
-        get { return _viscaIp; } 
-        set 
-        { 
-            if (_viscaIp != value) 
-            {
-                // Log removed for clean debug output
-                _viscaIp = value; 
-            }
-        }
-    }
+    public string viscaIp;
 
     // Port backing field
     private int _viscaPort = 52381;
@@ -69,16 +58,5 @@ public class CameraInfo
     /// <summary>
     /// VISCA port for this camera
     /// </summary>
-    public int viscaPort 
-    { 
-        get { return _viscaPort; } 
-        set 
-        { 
-            if (_viscaPort != value) 
-            {
-                // Log removed for clean debug output
-                _viscaPort = value; 
-            }
-        }
-    }
+    public int viscaPort { get { return _viscaPort; } set { _viscaPort = value; } }
 } 
