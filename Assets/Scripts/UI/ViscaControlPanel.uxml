@@ -2,27 +2,114 @@
   <Style src="ViscaControlPanel.uss"/>
   <ui:VisualElement class="visca-panel">
     <ui:VisualElement class="visca-inner-panel">
-      <ui:Label text="PTZ Camera Controls" class="panel-title"/>
-      <ui:VisualElement name="panRightVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Pan Right"/>
+      <!-- <ui:Label text="PTZ Camera Controls" class="panel-title"/> -->
+      <!-- Pan/Tilt Section -->
+      <ui:VisualElement class="movement-panel directions-panel panel">
+          <ui:Label text="PTZ Camera Controls" class="section-title"/>
+          <ui:VisualElement name="panTiltUpLeftVE" class="pt-btn">
+            <ui:Label text="↖"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="tiltUpVE" class="pt-btn">
+            <ui:Label text="↑"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="panTiltUpRightVE" class="pt-btn">
+            <ui:Label text="↗"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="panLeftVE" class="pt-btn">
+            <ui:Label text="←"/>
+          </ui:VisualElement>
+          <ui:Button name="resetButton" text="Reset" class="pt-btn"/>
+          <ui:VisualElement name="panRightVE" class="pt-btn">
+            <ui:Label text="→"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="panTiltDownLeftVE" class="pt-btn">
+            <ui:Label text="↙"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="tiltDownVE" class="pt-btn">
+            <ui:Label text="↓"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="panTiltDownRightVE" class="pt-btn">
+            <ui:Label text="↘"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="zoomInVE" class="pt-btn">
+            <ui:Label text="Zoom In"/>
+          </ui:VisualElement>
+          <ui:VisualElement name="zoomOutVE" class="pt-btn">
+            <ui:Label text="Zoom Out"/>
+          </ui:VisualElement>
+          <ui:Button name="stopButton" text="Stop" class="pt-btn"/>
       </ui:VisualElement>
-      <ui:VisualElement name="panLeftVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Pan Left"/>
+      
+      <!-- Basic Controls -->
+      
+      <!-- Focus Section -->
+      <ui:VisualElement class="focus-panel panel">
+      <ui:Label text="Focus Controls" class="section-title"/>
+        <ui:VisualElement name="focusNearVE" class="pt-btn">
+          <ui:Label text="Focus Near"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="focusFarVE" class="pt-btn">
+          <ui:Label text="Focus Far"/>
+        </ui:VisualElement>
+        <ui:Button name="focusAutoButton" text="Auto Focus" class="pt-btn"/>
+        <ui:Button name="focusManualButton" text="Manual Focus" class="pt-btn"/>
+        <ui:Button name="focusOnePushButton" text="One Push Auto Focus" class="pt-btn"/>
       </ui:VisualElement>
-      <ui:VisualElement name="tiltUpVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Tilt Up"/>
+      
+      <!-- White Balance Section -->
+      <ui:VisualElement class="wb-panel panel">
+      <ui:Label text="White Balance" class="section-title"/>
+      <ui:Button name="wbAutoButton" text="Auto" class="pt-btn"/>
+      <ui:Button name="wbIndoorButton" text="Indoor" class="pt-btn"/>
+      <ui:Button name="wbOutdoorButton" text="Outdoor" class="pt-btn"/>
+      <ui:Button name="wbOnePushButton" text="One Push" class="pt-btn"/>
+        <ui:Button name="wbATWButton" text="ATW" class="pt-btn"/>
+        <ui:Button name="wbOnePushTriggerButton" text="One Push Trigger" class="pt-btn"/>
       </ui:VisualElement>
-      <ui:VisualElement name="tiltDownVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Tilt Down"/>
+      
+      <!-- Exposure Section -->
+      <ui:VisualElement class="exposure-panel panel">
+      <ui:Label text="Exposure" class="section-title"/>
+      <ui:Button name="expFullAutoButton" text="Full Auto" class="pt-btn"/>
+      <ui:Button name="expManualButton" text="Manual" class="pt-btn"/>
+      <ui:Button name="expShutterPriorityButton" text="Shutter Priority" class="pt-btn"/>
+      <ui:Button name="expIrisPriorityButton" text="Iris Priority" class="pt-btn"/>
       </ui:VisualElement>
-      <ui:VisualElement name="zoomInVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Zoom In"/>
+     
+     
+      <!-- Camera Memory Section -->
+      <ui:VisualElement class="preset-panel">
+        <ui:Label text="Camera Presets" class="section-title"/>
+        
+        <!-- Preset 1 -->
+      
+        <ui:VisualElement class="preset-container">
+          <ui:Label text="Preset 1" class="preset-label"/>
+          <ui:Button name="preset1RecallButton" text="Recall" class="pt-btn"/>
+          <ui:Button name="preset1SetButton" text="Set" class="pt-btn"/>
+        </ui:VisualElement>
+        
+        <!-- Preset 2 -->
+        <ui:VisualElement class="preset-container">
+          <ui:Label text="Preset 2" class="preset-label"/>
+          <ui:Button name="preset2RecallButton" text="Recall" class="pt-btn"/>
+          <ui:Button name="preset2SetButton" text="Set" class="pt-btn"/>
+        </ui:VisualElement>
+        
+        <!-- Preset 3 -->
+        <ui:VisualElement class="preset-container">
+          <ui:Label text="Preset 3" class="preset-label"/>
+          <ui:Button name="preset3RecallButton" text="Recall" class="pt-btn"/>
+          <ui:Button name="preset3SetButton" text="Set" class="pt-btn"/>
+        </ui:VisualElement>
+        
+        <!-- Preset 4 -->
+        <ui:VisualElement class="preset-container">
+          <ui:Label text="Preset 4" class="preset-label"/>
+          <ui:Button name="preset4RecallButton" text="Recall" class="pt-btn "/>
+          <ui:Button name="preset4SetButton" text="Set" class="pt-btn"/>
+        </ui:VisualElement>
       </ui:VisualElement>
-      <ui:VisualElement name="zoomOutVE" class="custom-pan-button pt-btn">
-        <ui:Label text="Zoom Out"/>
-      </ui:VisualElement>
-      <ui:Button name="resetButton" text="Reset" class="pt-btn"/>
-      <ui:Button name="stopButton" text="Stop" class="pt-btn"/>
     </ui:VisualElement>
   </ui:VisualElement>
 </UXML>

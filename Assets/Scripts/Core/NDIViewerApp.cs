@@ -16,6 +16,8 @@ public class NDIViewerApp : MonoBehaviour
     public static int ActiveCameraPort { get; private set; } = 0;
     public static string ActiveCameraName { get; private set; } = "None";
 
+    [SerializeField] public string currentIP = "";
+
     [Header("Settings")]
     [SerializeField] private LayoutSettings layoutSettings;
     
@@ -80,16 +82,25 @@ public class NDIViewerApp : MonoBehaviour
     private void Update()
     {
         // Update textures for all camera tiles
-        foreach (var tile in cameraTiles.Values)
+        if (cameraTiles != null)
         {
-            tile.UpdateTexture();
+            foreach (var tile in cameraTiles.Values)
+            {
+                if (tile != null)
+                {
+                    tile.UpdateTexture();
+                }
+            }
         }
         
         // Check and attempt to reconnect lost NDI feeds
-        cameraRegistry.CheckFeeds();
+        if (cameraRegistry != null)
+        {
+            cameraRegistry.CheckFeeds();
+        }
         
-        // Verify that the active camera's IP matches what we expect based on its name
-        VerifyActiveCameraIP();
+        // // Verify that the active camera's IP matches what we expect based on its name
+        // VerifyActiveCameraIP();
     }
     
     #region Setup Methods
@@ -177,6 +188,9 @@ public class NDIViewerApp : MonoBehaviour
         var rt = btn.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2(-layoutSettings.Padding, -layoutSettings.Padding);
         
+        // Ensure button is always on top
+        btn.transform.SetAsLastSibling();
+        
         btn.onClick.AddListener(ToggleSettingsPanel);
     }
     
@@ -186,48 +200,7 @@ public class NDIViewerApp : MonoBehaviour
     
     private void OnCameraAdded(CameraInfo camera)
     {
-        // Assign different VISCA IPs based on camera name
-        string nameLower = camera.niceName.ToLower();
-        
-        // Improved detection for camera naming patterns - handle CAM1, CAM-1, Camera 1, etc.
-        bool isCam1 = nameLower.Contains("cam1") || nameLower.Contains("cam-1") || nameLower.Contains("cam 1") || nameLower.Contains("camera1") || nameLower.Contains("camera 1") || nameLower.Contains("camera-1");
-        bool isCam2 = nameLower.Contains("cam2") || nameLower.Contains("cam-2") || nameLower.Contains("cam 2") || nameLower.Contains("camera2") || nameLower.Contains("camera 2") || nameLower.Contains("camera-2");
-        bool isCam3 = nameLower.Contains("cam3") || nameLower.Contains("cam-3") || nameLower.Contains("cam 3") || nameLower.Contains("camera3") || nameLower.Contains("camera 3") || nameLower.Contains("camera-3");
-        bool isCam4 = nameLower.Contains("cam4") || nameLower.Contains("cam-4") || nameLower.Contains("cam 4") || nameLower.Contains("camera4") || nameLower.Contains("camera 4") || nameLower.Contains("camera-4");
-        
-        if (isCam1)
-        {
-            camera.viscaIp = "192.168.1.101";
-            Debug.Log($"Assigning IP 192.168.1.101 to camera {camera.niceName}");
-        }
-        else if (isCam2)
-        {
-            camera.viscaIp = "192.168.1.102";
-            Debug.Log($"Assigning IP 192.168.1.102 to camera {camera.niceName}");
-        }
-        else if (isCam3)
-        {
-            camera.viscaIp = "192.168.1.103";
-            Debug.Log($"Assigning IP 192.168.1.103 to camera {camera.niceName}");
-        }
-        else if (isCam4)
-        {
-            camera.viscaIp = "192.168.1.104";
-            Debug.Log($"Assigning IP 192.168.1.104 to camera {camera.niceName}");
-        }
-        else
-        {
-            // Default IP for unrecognized cameras
-            camera.viscaIp = "192.168.1.100";
-            Debug.Log($"⚠️ Unrecognized camera name pattern: {camera.niceName}, assigning default IP 192.168.1.100");
-        }
-        
-        // Force update the global tracker to ensure we're using the correct IP
-        if (camera.isActive)
-        {
-            UpdateGlobalCameraInfo(camera);
-        }
-        
+       
         // Create tile and add to dictionary
         CreateCameraTile(camera);
         
@@ -237,11 +210,11 @@ public class NDIViewerApp : MonoBehaviour
         // Update settings panel if open
         RefreshSettingsList();
         
-        // If this is the only camera and none active, make it active
-        if (cameraRegistry.Cameras.Count == 1 && cameraRegistry.ActiveCamera == null)
-        {
-            SetActiveCamera(camera);
-        }
+        // // If this is the only camera and none active, make it active
+        // if (cameraRegistry.Cameras.Count == 1 && cameraRegistry.ActiveCamera == null)
+        // {
+        //     SetActiveCamera(camera);
+        // }
     }
     
     private void OnCameraRemoved(CameraInfo camera)
@@ -301,26 +274,6 @@ public class NDIViewerApp : MonoBehaviour
     private void OnCameraTileSelected(CameraTileView tile)
     {
         SetActiveCamera(tile.CameraInfo);
-        
-        // Update global tracking variables
-        UpdateGlobalCameraInfo(tile.CameraInfo);
-    }
-    
-    // Helper method to update global tracking variables
-    private void UpdateGlobalCameraInfo(CameraInfo camera)
-    {
-        if (camera != null)
-        {
-            ActiveCameraIP = camera.viscaIp;
-            ActiveCameraPort = camera.viscaPort;
-            ActiveCameraName = camera.niceName;
-        }
-        else
-        {
-            ActiveCameraIP = "Not Set";
-            ActiveCameraPort = 0;
-            ActiveCameraName = "None";
-        }
     }
     
     private void OnCameraDisplayNameChanged(CameraInfo camera, string newName)
@@ -346,24 +299,45 @@ public class NDIViewerApp : MonoBehaviour
     
     private void SetActiveCamera(CameraInfo camera)
     {
+        if (camera == null)
+        {
+            Debug.LogWarning("SetActiveCamera called with null camera");
+            return;
+        }
+
+        // Set current IP from camera to the static property and serialized field
+        if (!string.IsNullOrEmpty(camera.viscaIp))
+        {
+            ActiveCameraIP = camera.viscaIp;
+            currentIP = camera.viscaIp;
+            ActiveCameraPort = camera.viscaPort;
+            ActiveCameraName = camera.niceName;
+        }
+
         // Update registry
-        cameraRegistry.SetActiveCamera(camera);
+        if (cameraRegistry != null)
+        {
+            cameraRegistry.SetActiveCamera(camera);
+        }
+        
+        // Update active camera reference
+        selectedCamera = camera;
         
         // Update tile visuals
-        foreach (var kvp in cameraTiles)
+        if (cameraTiles != null)
         {
-            bool isThisCamera = kvp.Key == camera;
-            kvp.Value.SetActive(isThisCamera);
-            
-            // If this is becoming the active camera, update global tracking
-            if (isThisCamera)
+            foreach (var kvp in cameraTiles)
             {
-                UpdateGlobalCameraInfo(camera);
+                bool isThisCamera = kvp.Key == camera;
+                kvp.Value.SetActive(isThisCamera);
             }
         }
         
         // Update status bar
-        statusBar.SetActiveCamera(camera);
+        if (statusBar != null)
+        {
+            statusBar.SetActiveCamera(camera);
+        }
     }
     
     private IEnumerator RefreshSourcesLoop()
@@ -406,27 +380,24 @@ public class NDIViewerApp : MonoBehaviour
         var panelObj = new GameObject("SettingsPanel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(mainCanvas.transform, false);
         var img = panelObj.GetComponent<Image>();
-        img.color = layoutSettings.SettingsPanelBackground;
+        img.color = new Color(0, 0, 0, 0.75f); // Semi-transparent black background
         
-        // Configure rect transform
+        // Configure rect transform to be full screen
         var rt = panelObj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(1, 1);
-        rt.anchorMax = new Vector2(1, 1);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(layoutSettings.SettingsPanelWidth, layoutSettings.SettingsPanelHeight);
-        rt.anchoredPosition = new Vector2(-layoutSettings.SettingsPanelWidth/2 - layoutSettings.Padding, 
-                                         -layoutSettings.SettingsPanelHeight/2 - layoutSettings.Padding);
+        rt.sizeDelta = new Vector2(0.5f, 0.5f); // Full screen
+        rt.anchoredPosition = Vector2.zero; // Centered
         
         // Create scroll container
         var scroll = new GameObject("Scroll", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(Mask), typeof(Image));
         scroll.transform.SetParent(panelObj.transform, false);
         var scrt = scroll.GetComponent<RectTransform>();
-        scrt.anchorMin = new Vector2(0.5f, 0f);
-        scrt.anchorMax = new Vector2(0.5f, 1f);
+        scrt.anchorMin = new Vector2(0.5f, 0.5f);
+        scrt.anchorMax = new Vector2(0.5f, 0.5f);
         scrt.pivot = new Vector2(0.5f, 0.5f);
-        
-        float scrollWidth = layoutSettings.SettingsItemWidth + 2 * 10f;
-        scrt.sizeDelta = new Vector2(scrollWidth, -layoutSettings.SettingsScrollVerticalPadding);
+        scrt.sizeDelta = new Vector2(600, 400);
         scrt.anchoredPosition = Vector2.zero;
         
         var vlg = scroll.GetComponent<VerticalLayoutGroup>();
@@ -436,7 +407,7 @@ public class NDIViewerApp : MonoBehaviour
         vlg.childForceExpandHeight = false;
         vlg.childControlWidth = false;
         vlg.childControlHeight = false;
-        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.childAlignment = TextAnchor.MiddleCenter;
         
         var scrollImg = scroll.GetComponent<Image>();
         scrollImg.color = layoutSettings.SettingsScrollBackground;
@@ -573,16 +544,23 @@ public class NDIViewerApp : MonoBehaviour
         
         return item;
     }
-    
     private void CreateInsertionPoint(int insertIndex)
     {
+        // Don't create insertion point if this is adjacent to selected camera
+        if (selectedCamera != null) {
+            int selectedIndex = cameraRegistry.Cameras.ToList().IndexOf(selectedCamera);
+            if (insertIndex == selectedIndex || insertIndex == selectedIndex + 1) {
+                return;
+            }
+        }
+        
         var container = new GameObject("InsertPoint", typeof(RectTransform), typeof(LayoutElement));
         container.transform.SetParent(settingsListContainer, false);
         
         var le = container.GetComponent<LayoutElement>();
-        le.minHeight = 24;
+        le.minHeight = 8;
         le.minWidth = layoutSettings.SettingsItemWidth;
-        le.preferredHeight = 24;
+        le.preferredHeight = 8;
         le.preferredWidth = layoutSettings.SettingsItemWidth;
         
         // Create plus button
@@ -594,7 +572,16 @@ public class NDIViewerApp : MonoBehaviour
                 // Move the selected camera to this position
                 if (selectedCamera != null)
                 {
-                    cameraRegistry.ReorderCamera(selectedCamera, insertIndex);
+                    // Get current camera count and ensure insert index is valid
+                    int currentCount = cameraRegistry.Cameras.Count;
+                    int safeIndex = Mathf.Min(insertIndex, currentCount - 1);
+                    
+                    // If inserting at end, use current count - 1 to put at last position
+                    if (insertIndex >= currentCount) {
+                        safeIndex = currentCount - 1;
+                    }
+                    
+                    cameraRegistry.ReorderCamera(selectedCamera, safeIndex);
                     
                     // Exit edit mode
                     isInEditMode = false;
@@ -613,54 +600,23 @@ public class NDIViewerApp : MonoBehaviour
         btnRT.anchorMin = new Vector2(0.5f, 0.5f);
         btnRT.anchorMax = new Vector2(0.5f, 0.5f);
     }
-    
     #endregion
     
-    // New helper method to verify and fix the active camera IP if needed
-    private void VerifyActiveCameraIP()
-    {
-        // Only check if we have an active camera
-        CameraInfo activeCamera = cameraRegistry?.ActiveCamera;
-        if (activeCamera == null) return;
+    // // New helper method to verify and fix the active camera IP if needed
+    // private void VerifyActiveCameraIP()
+    // {
+    //     // Only check if we have an active camera
+    //     CameraInfo activeCamera = cameraRegistry?.ActiveCamera;
+    //     if (activeCamera == null) return;
         
-        string expectedIP = null;
-        string nameLower = activeCamera.niceName.ToLower();
-        
-        // Determine expected IP based on camera name
-        if (nameLower.Contains("cam1") || nameLower.Contains("cam-1") || nameLower.Contains("cam 1"))
-            expectedIP = "192.168.1.101";
-        else if (nameLower.Contains("cam2") || nameLower.Contains("cam-2") || nameLower.Contains("cam 2"))
-            expectedIP = "192.168.1.102";
-        else if (nameLower.Contains("cam3") || nameLower.Contains("cam-3") || nameLower.Contains("cam 3"))
-            expectedIP = "192.168.1.103";
-        else if (nameLower.Contains("cam4") || nameLower.Contains("cam-4") || nameLower.Contains("cam 4"))
-            expectedIP = "192.168.1.104";
-        
-        // If we could determine an expected IP and it doesn't match current IP
-        if (expectedIP != null && activeCamera.viscaIp != expectedIP)
-        {
-            Debug.LogWarning($"⚠️ IP MISMATCH DETECTED: Camera {activeCamera.niceName} should use IP {expectedIP} but is using {activeCamera.viscaIp}");
-            
-            // Fix the IP address
-            int currentPort = activeCamera.viscaPort; // Save current port
-            
-            Debug.Log($"🔄 AUTO-CORRECTING IP: Changing {activeCamera.niceName} from {activeCamera.viscaIp} to {expectedIP}");
-            activeCamera.viscaIp = expectedIP;
-            
-            // Update the VISCA controller
-            var viscaController = FindObjectOfType<ViscaControlPanelController>();
-            if (viscaController != null)
-            {
-                viscaController.SetIPAddress(expectedIP);
-            }
-            
-            // Update global tracker
-            UpdateGlobalCameraInfo(activeCamera);
-            
-            // Notify listeners of the change
-            cameraRegistry.UpdateCameraConnection(activeCamera, expectedIP, currentPort);
-        }
-    }
+    //     string expectedIP = null;
+    //     string nameLower = activeCamera.niceName.ToLower();
+    // }
+    
+    // public string GetCurrentCameraIp()
+    // {
+    //     return ActiveCameraIP;
+    // }
     
     public CameraRegistry GetCameraRegistry()
     {

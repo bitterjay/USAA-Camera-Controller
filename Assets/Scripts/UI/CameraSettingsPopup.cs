@@ -64,8 +64,8 @@ public class CameraSettingsPopup : MonoBehaviour
         // Set initial values
         nameInputField.text = cameraInfo.niceName;
         ndiNameLabel.text = cameraInfo.sourceName;
-        ipAddressInputField.text = cameraInfo.viscaIp;
-        portInputField.text = cameraInfo.viscaPort.ToString();
+        // ipAddressInputField.text = cameraInfo.viscaIp;
+        // portInputField.text = cameraInfo.viscaPort.ToString();
     }
     
     /// <summary>
@@ -223,37 +223,37 @@ public class CameraSettingsPopup : MonoBehaviour
         // Create IP input field
         CreateViscaIpField(viscaIpContainer.transform);
         
-        // VISCA Port section - container
-        var viscaPortContainer = new GameObject("ViscaPortContainer", typeof(RectTransform));
-        viscaPortContainer.transform.SetParent(parent, false);
-        var viscaPortVLayout = viscaPortContainer.AddComponent<VerticalLayoutGroup>();
-        viscaPortVLayout.childAlignment = TextAnchor.UpperCenter;
-        viscaPortVLayout.spacing = 5f;
-        viscaPortVLayout.padding = new RectOffset(0, 0, 5, 5);
+        // // VISCA Port section - container
+        // var viscaPortContainer = new GameObject("ViscaPortContainer", typeof(RectTransform));
+        // viscaPortContainer.transform.SetParent(parent, false);
+        // var viscaPortVLayout = viscaPortContainer.AddComponent<VerticalLayoutGroup>();
+        // viscaPortVLayout.childAlignment = TextAnchor.UpperCenter;
+        // viscaPortVLayout.spacing = 5f;
+        // viscaPortVLayout.padding = new RectOffset(0, 0, 5, 5);
         
-        // VISCA Port label
-        var viscaPortTitleObj = new GameObject("ViscaPortTitle", typeof(RectTransform));
-        viscaPortTitleObj.transform.SetParent(viscaPortContainer.transform, false);
-        var viscaPortTitle = viscaPortTitleObj.AddComponent<Text>();
-        viscaPortTitle.text = "VISCA Port:";
-        viscaPortTitle.font = UIFactory.BuiltinFont;
-        viscaPortTitle.fontSize = 12;
-        viscaPortTitle.alignment = TextAnchor.UpperCenter;
-        viscaPortTitle.color = new Color(0.7f, 0.7f, 0.7f);
+        // // VISCA Port label
+        // var viscaPortTitleObj = new GameObject("ViscaPortTitle", typeof(RectTransform));
+        // viscaPortTitleObj.transform.SetParent(viscaPortContainer.transform, false);
+        // var viscaPortTitle = viscaPortTitleObj.AddComponent<Text>();
+        // viscaPortTitle.text = "VISCA Port:";
+        // viscaPortTitle.font = UIFactory.BuiltinFont;
+        // viscaPortTitle.fontSize = 12;
+        // viscaPortTitle.alignment = TextAnchor.UpperCenter;
+        // viscaPortTitle.color = new Color(0.7f, 0.7f, 0.7f);
         
-        // Add layout element
-        var viscaPortTitleLayout = viscaPortTitleObj.AddComponent<LayoutElement>();
-        viscaPortTitleLayout.minHeight = 20;
-        viscaPortTitleLayout.preferredHeight = 20;
+        // // Add layout element
+        // var viscaPortTitleLayout = viscaPortTitleObj.AddComponent<LayoutElement>();
+        // viscaPortTitleLayout.minHeight = 20;
+        // viscaPortTitleLayout.preferredHeight = 20;
         
-        // Create Port input field
-        CreateViscaPortField(viscaPortContainer.transform);
+        // // Create Port input field
+        // CreateViscaPortField(viscaPortContainer.transform);
         
-        // Add a spacer that will push the save button to the bottom
-        var spacerObj = new GameObject("Spacer", typeof(RectTransform));
-        spacerObj.transform.SetParent(parent, false);
-        var spacerLayout = spacerObj.AddComponent<LayoutElement>();
-        spacerLayout.flexibleHeight = 1;
+        // // Add a spacer that will push the save button to the bottom
+        // var spacerObj = new GameObject("Spacer", typeof(RectTransform));
+        // spacerObj.transform.SetParent(parent, false);
+        // var spacerLayout = spacerObj.AddComponent<LayoutElement>();
+        // spacerLayout.flexibleHeight = 1;
         
         // Create save button at the bottom
         CreateSaveButton(parent);
@@ -354,7 +354,7 @@ public class CameraSettingsPopup : MonoBehaviour
         placeholderRT.offsetMin = new Vector2(8, 0);
         placeholderRT.offsetMax = Vector2.zero;
         
-        viscaIpInput.placeholder = placeholderText;
+        // viscaIpInput.placeholder = placeholderText;
         
         var inputRT = inputObj.GetComponent<RectTransform>();
         inputRT.sizeDelta = new Vector2(180, 26);
@@ -474,28 +474,19 @@ public class CameraSettingsPopup : MonoBehaviour
         OnSaveChanges?.Invoke(newName);
         
         // Trigger connection changed event if IP or port changed
-        if (newIp != cameraInfo.viscaIp || newPort != cameraInfo.viscaPort)
+        if (newIp != cameraInfo.viscaIp)
         {
-            Debug.Log($"Connection settings changed for {cameraInfo.niceName}: IP {cameraInfo.viscaIp} -> {newIp}, Port {cameraInfo.viscaPort} -> {newPort}");
-            OnConnectionChanged?.Invoke(newIp, newPort);
+            // Debug.Log($"Connection settings changed for {cameraInfo.niceName}: IP {cameraInfo.viscaIp} -> {newIp};/
+            // OnConnectionChanged?.Invoke(newIp);
             
-            // Update the camera registry directly
-            var registry = UnityEngine.Object.FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
-            if (registry != null)
-            {
-                registry.UpdateCameraConnection(cameraInfo, newIp, newPort);
-            }
+            // // Update the camera registry directly
+            // var registry = UnityEngine.Object.FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
+            // if (registry != null)
+            // {
+            //     registry.UpdateCameraConnection(cameraInfo, newIp);
+            // }
             
-            // Update the controller if this is the active camera
-            if (cameraInfo.isActive)
-            {
-                var controller = UnityEngine.Object.FindObjectOfType<ViscaControlPanelController>();
-                if (controller != null)
-                {
-                    controller.SetIPAddress(newIp);
-                    controller.SetPort(newPort);
-                }
-            }
+            
         }
         
         // Close the popup

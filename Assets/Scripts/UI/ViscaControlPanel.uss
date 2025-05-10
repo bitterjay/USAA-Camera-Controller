@@ -9,38 +9,142 @@
     --button-hover: #4a8cb5;       /* Slightly lighter blue for hover states */
     --button-active: #2a6c95;      /* Darker blue for active states */
     --panel-shadow: rgba(0, 0, 0, 0.3);  /* Shadow color */
+    --focus-color: #8bc34a;        /* Green for focus controls */
+    --wb-color: #ff9800;           /* Orange for white balance */
+    --exp-color: #9c27b0;          /* Purple for exposure */
+    --preset-color: #e91e63;       /* Pink for presets */
 }
 
 .visca-panel {
     flex-direction: row;
     align-items: center;
-    background-color: var(--secondary-color);
-    width: 100%;
-  height:50px;
-  position:absolute;
-  bottom:20px;
-  left:0;
-  background-color:var(--secondary-color);
+    width: 200;
+    height:90%;
+    position:absolute;
+    bottom:0px;
+    right:0;
+    background-color:rgba(0, 0, 0, 0);
 }
 
 .visca-inner-panel {
-  flex-direction: row;
-  align-items: center;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 2px;
+    width:100%;
 }
 
-.panel-title {
+
+
+.section-title {
     color: white;
-    font-size: 10px;
+    -unity-text-align: middle-center;
+    width: 100%;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
 }
 
+
+/* Focus control styling */
+#focusNearVE, #focusFarVE, #focusAutoButton, #focusManualButton, #focusOnePushButton {
+    background-color: var(--focus-color);
+}
+
+#focusNearVE:hover, #focusFarVE:hover, #focusAutoButton:hover, #focusManualButton:hover, #focusOnePushButton:hover {
+    background-color: rgba(139, 195, 74, 0.8); /* Lighter green */
+}
+
+#focusNearVE:active, #focusFarVE:active, #focusAutoButton:active, #focusManualButton:active, #focusOnePushButton:active {
+    background-color: rgba(139, 195, 74, 0.6); /* Darker green */
+}
+
+/* White balance styling */
+#wbAutoButton, #wbIndoorButton, #wbOutdoorButton, #wbOnePushButton, #wbATWButton, #wbOnePushTriggerButton {
+    background-color: var(--wb-color);
+}
+
+#wbAutoButton:hover, #wbIndoorButton:hover, #wbOutdoorButton:hover, #wbOnePushButton:hover, #wbATWButton:hover, #wbOnePushTriggerButton:hover {
+    background-color: rgba(255, 152, 0, 0.8); /* Lighter orange */
+}
+
+#wbAutoButton:active, #wbIndoorButton:active, #wbOutdoorButton:active, #wbOnePushButton:active, #wbATWButton:active, #wbOnePushTriggerButton:active {
+    background-color: rgba(255, 152, 0, 0.6); /* Darker orange */
+}
+
+/* Exposure styling */
+#expFullAutoButton, #expManualButton, #expShutterPriorityButton, #expIrisPriorityButton {
+    background-color: var(--exp-color);
+}
+
+#expFullAutoButton:hover, #expManualButton:hover, #expShutterPriorityButton:hover, #expIrisPriorityButton:hover {
+    background-color: rgba(156, 39, 176, 0.8); /* Lighter purple */
+}
+
+#expFullAutoButton:active, #expManualButton:active, #expShutterPriorityButton:active, #expIrisPriorityButton:active {
+    background-color: rgba(156, 39, 176, 0.6); /* Darker purple */
+}
+
+/* Preset container */
+.preset-container {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 4px;
+    width:auto;
+    -unity-text-align: middle-center;
+    flex-wrap: wrap;
+}
+
+.preset-panel {
+    width:150px;
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    background-color: var(--panel-shadow);
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+/* Preset label */
+.preset-label {
+    color: white;
+   font-size: 6px;
+    width: 40px;
+    width:100%;
+    -unity-text-align: middle-center;
+}
+
+/* Preset buttons */
+.preset-btn {
+    width: 10px;
+    height: 10px;
+    margin: 2px;
+    background-color: var(--preset-color);
+    border-radius: 4px;
+    font-size: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+.preset-btn:hover {
+    background-color: rgba(233, 30, 99, 0.8); /* Lighter pink */
+}
+
+.preset-btn:active {
+    background-color: rgba(233, 30, 99, 0.6); /* Darker pink */
+}
 
 
 .pt-btn {
-    width: 30px;
+    width:30px;
     height: 30px;
-    margin: 4px;
+    margin: 2px;
     background-color: var(--primary-color);
-    border-radius: 6px;
+    border-radius: 4px;
     justify-content: center;
     align-items: center;
     flex-direction: row;
@@ -56,3 +160,46 @@
 .pt-btn:active {
     background-color: var(--button-active);
 }
+
+
+.movement-button {
+    height: 30px;
+    margin: 2px;
+    background-color: var(--primary-color);
+    border-radius: 6px;
+}
+
+.directions-panel {
+    width:110px;
+}
+
+.focus-panel {
+    width:110px;
+}
+
+.wb-panel {
+    width:110px;
+}   
+
+.exposure-panel {
+    width:80;
+}
+
+.section-title {
+    width:100%;
+    color:white;
+    font-size: 6px;
+    font-weight: bold;
+    
+}
+.panel {
+    border-radius: 6px;
+    margin: 10px;
+    background-color: var(--panel-shadow);
+    display: flex;   
+   flex-direction: row;
+   flex-wrap: wrap;
+   justify-content: center;
+   align-items: center;
+}
+

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Klak.Ndi;
 using System;
+using System.Linq; // Add LINQ namespace for IndexOf extension method
 
 /// <summary>
 /// Visual representation of a camera tile in the grid
@@ -34,35 +35,61 @@ public class CameraTileView : MonoBehaviour
     private GameObject noSignalOverlay;
     private bool overlayInitialized = false;
     
+    // Reference to the camera registry
+    private CameraRegistry cameraRegistry;
+    
+    private NDIViewerApp ndiApp;
+    
+    // Remove the field initializer that uses FindObjectOfType
+    public string ndiAppIp = "";
+    
     /// <summary>
     /// Initializes the camera tile with the given camera info
     /// </summary>
-    /// <param name="cameraInfo">The camera to display</param>
+    /// <param name="cameraInfo">Camera information</param>
     /// <param name="settings">Layout settings</param>
-    /// <param name="gearIcon">Gear icon texture</param>
+    /// <param name="gearIcon">Optional gear icon texture</param>
     public void Initialize(CameraInfo cameraInfo, LayoutSettings settings, Texture2D gearIcon = null)
     {
         CameraInfo = cameraInfo;
         layoutSettings = settings;
         gearIconTexture = gearIcon;
         IsActive = cameraInfo.isActive;
-        ApplySettings();
+        
+        // Create visual elements
+        CreateVisualElements();
+        
+        // Initialize overlay
         EnsureNoSignalOverlay();
         SetNoSignalOverlay(!cameraInfo.isFeedAvailable);
+        
         // Subscribe to feed status changes
-        var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
-        if (registry != null)
+        if (CameraInfo != null)
         {
-            registry.OnFeedStatusChanged += OnFeedStatusChanged;
+            var app = FindObjectOfType<NDIViewerApp>();
+            if (app != null)
+            {
+                ndiApp = app;
+                ndiAppIp = app.currentIP;
+                
+                // Get the camera registry
+                cameraRegistry = app.GetCameraRegistry();
+                if (cameraRegistry != null)
+                {
+                    cameraRegistry.OnFeedStatusChanged += OnFeedStatusChanged;
+                }
+            }
         }
+        
+        // Apply settings after everything is initialized
+        ApplySettings();
     }
     
     private void OnDestroy()
     {
-        var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
-        if (registry != null)
+        if (cameraRegistry != null)
         {
-            registry.OnFeedStatusChanged -= OnFeedStatusChanged;
+            cameraRegistry.OnFeedStatusChanged -= OnFeedStatusChanged;
         }
     }
     
@@ -121,11 +148,13 @@ public class CameraTileView : MonoBehaviour
         IsActive = active;
         CameraInfo.isActive = active;
 
-        Debug.Log($"SetActive called for camera {CameraInfo.niceName} - Active: {active}");
+
+
+        // Debug.Log($"SetActive called for camera {CameraInfo.niceName} - Active: {active}");
         
-        // Debug info about the camera
-        Debug.Log($"Camera info - NiceName: {CameraInfo.niceName}, Source: {CameraInfo.sourceName}");
-        Debug.Log($"Camera VISCA settings - IP: {CameraInfo.viscaIp}, Port: {CameraInfo.viscaPort}");
+        // // Debug info about the camera
+        // // Debug.Log($"Camera info - NiceName: {CameraInfo.niceName}, Source: {CameraInfo.sourceName}");
+        // Debug.Log($"Camera VISCA settings - IP: {CameraInfo.viscaIp}, Port: {CameraInfo.viscaPort}");
         
         // Update border color based on active state
         if (borderImage != null)
@@ -135,22 +164,6 @@ public class CameraTileView : MonoBehaviour
                 : layoutSettings.TileBorderColor;
         }
         
-        // We don't need to directly manipulate the VISCA control panel anymore
-        // The camera selection event in CameraRegistry will handle this
-        if (active)
-        {
-            // Find the camera registry
-            var ndiApp = FindObjectOfType<NDIViewerApp>();
-            if (ndiApp != null)
-            {
-                var registry = ndiApp.GetCameraRegistry();
-                if (registry != null)
-                {
-                    // This will trigger the OnCameraSelected event which the ViscaController listens to
-                    registry.SetActiveCamera(CameraInfo);
-                }
-            }
-        }
     }
     
     /// <summary>
@@ -238,13 +251,6 @@ public class CameraTileView : MonoBehaviour
         
         // Add settings button (gear icon) in bottom-left corner
         AddSettingsButton();
-        
-        // Add button component for click handling
-        var button = gameObject.AddComponent<Button>();
-        var colors = button.colors;
-        colors.normalColor = Color.white;
-        colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f);
-        button.colors = colors;
         
         // Initialize our click handler
         InitializeClickHandler();
@@ -355,10 +361,14 @@ public class CameraTileView : MonoBehaviour
         }
     }
 
-    // Add this method to directly handle the camera tile click
+
     private void InitializeClickHandler()
     {
-        var button = GetComponent<Button>();
+        // Add button component for click handling, but only if not already present
+        var button = gameObject.GetComponent<Button>();
+        if (button == null)
+            button = gameObject.AddComponent<Button>();
+
         if (button != null)
         {
             // Clear any existing listeners to avoid duplicates
@@ -367,31 +377,39 @@ public class CameraTileView : MonoBehaviour
             // Add our click handler
             button.onClick.AddListener(() => {
                 Debug.Log($"⭐⭐⭐ CAMERA TILE CLICKED: {CameraInfo.niceName} ⭐⭐⭐");
-                Debug.Log($"⭐⭐⭐ VISCA IP: {CameraInfo.viscaIp}, PORT: {CameraInfo.viscaPort} ⭐⭐⭐");
                 
-                // Find the camera registry and set active camera
-                var registry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
-                if (registry != null)
+                // Extract IP address from camera name
+                string extractedIp = null;
+                if (!string.IsNullOrEmpty(CameraInfo.niceName))
                 {
-                    Debug.Log($"Setting active camera via registry: {CameraInfo.niceName}");
-                    registry.SetActiveCamera(CameraInfo);
+                    // Look for an IP address pattern in the name
+                    var ipPattern = @"\b(?:\d{1,3}\.){3}\d{1,3}\b";
+                    var match = System.Text.RegularExpressions.Regex.Match(CameraInfo.niceName, ipPattern);
+                    if (match.Success)
+                    {
+                        extractedIp = match.Value;
+                        Debug.Log($"Extracted IP {extractedIp} from camera name: {CameraInfo.niceName}");
+                    }
                 }
-                else
+
+                // Update NDIViewerApp with the extracted IP
+                if (ndiApp != null && !string.IsNullOrEmpty(extractedIp))
                 {
-                    Debug.LogError("Could not find NDIViewerApp or CameraRegistry!");
-                    
-                    // Fallback: Try to update the controller directly
-                    var viscaController = FindObjectOfType<ViscaControlPanelController>();
-                    if (viscaController != null)
-                    {
-                        Debug.Log($"Fallback: Setting active camera directly on controller");
-                        viscaController.SetIPAddress(CameraInfo.viscaIp);
-                        viscaController.SetPort(CameraInfo.viscaPort);
-                    }
-                    else
-                    {
-                        Debug.LogError("CRITICAL ERROR: No way to update active camera found!");
-                    }
+                    ndiApp.currentIP = extractedIp;
+                    Debug.Log($"Updated NDIViewerApp.currentIP to: {extractedIp}");
+                }
+                
+                // Set this camera as active in the registry
+                if (cameraRegistry != null)
+                {
+                    cameraRegistry.SetActiveCamera(CameraInfo);
+                }
+                
+                // Always call the VISCA controller after setting active
+                var viscaController = FindObjectOfType<ViscaControlPanelController>();
+                if (viscaController != null)
+                {
+                    viscaController.OnCameraSelected(CameraInfo);
                 }
                 
                 // Call any additional listeners
