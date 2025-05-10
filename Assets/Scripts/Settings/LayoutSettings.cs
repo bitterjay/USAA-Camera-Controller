@@ -26,6 +26,8 @@ public class LayoutSettings : ScriptableObject
     [SerializeField] private Color tileBorderColor = Color.white;
     [SerializeField] private Color activeTileBorderColor = Color.green;
     [SerializeField] private float tileBorderWidth = 1f;
+    [SerializeField] private Color tileBackgroundColor = new Color(0.15f, 0.15f, 0.15f, 1f);
+    [SerializeField] private Color activeTileBackgroundColor = new Color(0.25f, 0.4f, 0.2f, 1f);
 
     [Header("Settings Panel Item Appearance")]
     [SerializeField] private float settingsItemWidth = 200f;
@@ -63,6 +65,8 @@ public class LayoutSettings : ScriptableObject
     public Color TileBorderColor => tileBorderColor;
     public Color ActiveTileBorderColor => activeTileBorderColor;
     public float TileBorderWidth => tileBorderWidth;
+    public Color TileBackgroundColor => tileBackgroundColor;
+    public Color ActiveTileBackgroundColor => activeTileBackgroundColor;
     
     // Settings Panel Properties
     public float SettingsItemWidth => settingsItemWidth;

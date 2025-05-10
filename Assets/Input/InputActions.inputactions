@@ -15,6 +15,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "movePresets",
+                    "type": "Button",
+                    "id": "89fc19a8-ad20-4e2c-b359-b77ce0c5fcec",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "selectLeftCamera",
                     "type": "Button",
                     "id": "243d11fd-bf70-4722-92d7-1567e45c5c3e",
@@ -27,6 +36,33 @@
                     "name": "selectRightCamera",
                     "type": "Button",
                     "id": "04ff09c1-96ec-456a-92e5-683b45d8e301",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "zoomCamera",
+                    "type": "Value",
+                    "id": "cec84824-1c3f-4d39-891c-d1e28a13ca0e",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Save Preset",
+                    "type": "Button",
+                    "id": "d57800c4-db1f-4449-972a-7eab5c640d20",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Execute Preset",
+                    "type": "Button",
+                    "id": "eddb8ef7-bede-4c63-aa1a-089d645c0083",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -64,6 +100,83 @@
                     "processors": "",
                     "groups": "",
                     "action": "selectRightCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "837b4850-8e94-4080-9554-acee442f95be",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "zoomCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "59c1a13a-a957-42f4-9b39-51c237f6ef74",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Save Preset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aa4ac144-0666-47f5-b2b9-fbde210c860c",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Execute Preset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1a113aa7-3539-4d08-9cef-fb1abb7cf9ef",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "movePresets",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "77715de7-7145-423a-b1b6-448ae49f6f09",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "movePresets",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "957c84b1-e9cb-43a4-ab7d-3db3f287f710",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "movePresets",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b9c9cc2a-bff8-40d1-b399-c1877bbf79de",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "movePresets",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

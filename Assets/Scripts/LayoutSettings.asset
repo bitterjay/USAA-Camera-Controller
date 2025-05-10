@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438d4ff2b002c43d999012ed93addd81, type: 3}
+  m_Name: LayoutSettings
+  m_EditorClassIdentifier: 
+  padding: 10
+  aspectRatio: 1.7777778
+  autoLayoutGrid: 1
+  manualColumns: 3
+  manualRows: 2
+  maxAutoColumns: 4
+  maxAutoRows: 2
+  autoSizeCells: 1
+  manualCellWidth: 320
+  maintainAspectRatio: 1
+  manualCellHeight: 180
+  tileBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  activeTileBorderColor: {r: 0, g: 1, b: 0, a: 1}
+  tileBorderWidth: 1
+  settingsItemWidth: 200
+  settingsItemHeight: 24
+  settingsItemBackground: {r: 1, g: 1, b: 1, a: 1}
+  settingsItemTextColor: {r: 0, g: 0, b: 0, a: 1}
+  settingsPanelBackground: {r: 0, g: 0, b: 0, a: 1}
+  settingsScrollBackground: {r: 1, g: 1, b: 1, a: 1}
+  settingsScrollVerticalPadding: 40
+  settingsPanelWidth: 300
+  settingsPanelHeight: 400
+  cameraSettingsPopupWidth: 400
+  cameraSettingsPopupHeight: 300

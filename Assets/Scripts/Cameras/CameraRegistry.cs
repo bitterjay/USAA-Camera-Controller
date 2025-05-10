@@ -73,12 +73,7 @@ public class CameraRegistry
             Debug.Log($"Added camera: {sourceName}");
         }
         
-        // Set the first camera as active if we have any
-        if (cameras.Count > 0)
-        {
-            SetActiveCamera(cameras[0]);
-            Debug.Log($"First camera: {cameras[0].niceName} (source: {cameras[0].sourceName})");
-        }
+        
     }
     
     /// <summary>

@@ -50,6 +50,7 @@ public class NDIViewerApp : MonoBehaviour
     private Dictionary<CameraInfo, CameraTileView> cameraTiles = new Dictionary<CameraInfo, CameraTileView>();
     private bool isInEditMode = false;
     private CameraInfo selectedCamera = null;
+    private bool autoDiscoverFired = false;
     
     private void Start()
     {
@@ -72,9 +73,6 @@ public class NDIViewerApp : MonoBehaviour
         // Create settings button
         CreateGlobalSettingsButton();
         
-        // Auto-discover cameras
-        cameraRegistry.AutoDiscoverCameras();
-        
         // Start the refresh loop
         StartCoroutine(RefreshSourcesLoop());
     }
@@ -91,6 +89,13 @@ public class NDIViewerApp : MonoBehaviour
                     tile.UpdateTexture();
                 }
             }
+        }
+        
+        // Fire AutoDiscoverCameras after first Update, only once
+        if (!autoDiscoverFired && cameraRegistry != null)
+        {
+            cameraRegistry.AutoDiscoverCameras();
+            autoDiscoverFired = true;
         }
         
         // Check and attempt to reconnect lost NDI feeds
@@ -297,7 +302,7 @@ public class NDIViewerApp : MonoBehaviour
         }
     }
     
-    private void SetActiveCamera(CameraInfo camera)
+    public void SetActiveCamera(CameraInfo camera)
     {
         if (camera == null)
         {

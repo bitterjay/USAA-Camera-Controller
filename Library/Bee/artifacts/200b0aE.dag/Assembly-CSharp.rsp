@@ -362,6 +362,7 @@
 "Assets/Scripts/Cameras/ViscaOverIpSender.cs"
 "Assets/Scripts/Core/GridLayoutController.cs"
 "Assets/Scripts/Core/NDIViewerApp.cs"
+"Assets/Scripts/GamepadCameraCycler.cs"
 "Assets/Scripts/GamepadDebug.cs"
 "Assets/Scripts/Settings/LayoutSettings.cs"
 "Assets/Scripts/UI/CameraListItem.cs"

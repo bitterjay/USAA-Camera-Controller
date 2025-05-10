@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using Klak.Ndi;
 using System;
 using System.Linq; // Add LINQ namespace for IndexOf extension method
+// Add this if not present
+// using Assets.Scripts.UI; // Only if ViscaControlPanelController is in a namespace
 
 /// <summary>
 /// Visual representation of a camera tile in the grid
@@ -148,22 +150,18 @@ public class CameraTileView : MonoBehaviour
         IsActive = active;
         CameraInfo.isActive = active;
 
-
-
-        // Debug.Log($"SetActive called for camera {CameraInfo.niceName} - Active: {active}");
-        
-        // // Debug info about the camera
-        // // Debug.Log($"Camera info - NiceName: {CameraInfo.niceName}, Source: {CameraInfo.sourceName}");
-        // Debug.Log($"Camera VISCA settings - IP: {CameraInfo.viscaIp}, Port: {CameraInfo.viscaPort}");
-        
         // Update border color based on active state
         if (borderImage != null)
         {
+            // Set border color
             borderImage.color = active 
                 ? layoutSettings.ActiveTileBorderColor 
                 : layoutSettings.TileBorderColor;
+            // Set background color (use a separate image or overlay if needed)
+            borderImage.color = active 
+                ? layoutSettings.ActiveTileBackgroundColor 
+                : layoutSettings.TileBackgroundColor;
         }
-        
     }
     
     /// <summary>
@@ -200,6 +198,7 @@ public class CameraTileView : MonoBehaviour
         {
             videoDisplay.texture = tex;
             Debug.Log($"Updated texture for camera {CameraInfo.niceName}");
+            
         }
     }
     
@@ -416,5 +415,44 @@ public class CameraTileView : MonoBehaviour
                 OnSelected?.Invoke(this);
             });
         }
+    }
+
+    private void CycleCamera(int direction)
+    {
+        var ndiApp = FindObjectOfType<NDIViewerApp>();
+        if (ndiApp != null)
+            cameraRegistry = ndiApp.GetCameraRegistry();
+
+        if (cameraRegistry == null || cameraRegistry.Cameras.Count == 0)
+            return;
+
+        var cameras = cameraRegistry.Cameras.ToList();
+        int count = cameras.Count;
+        int currentIndex = cameras.IndexOf(cameraRegistry.ActiveCamera);
+
+        // If no camera is active, select the first one
+        CameraInfo selectedCamera;
+        if (currentIndex < 0)
+        {
+            selectedCamera = cameras[0];
+            ndiApp?.SetActiveCamera(selectedCamera);
+            Debug.Log($"No camera was active. Selected first camera: {selectedCamera.niceName}");
+        }
+        else
+        {
+            int newIndex = (currentIndex + direction + count) % count;
+            selectedCamera = cameras[newIndex];
+            ndiApp?.SetActiveCamera(selectedCamera);
+            Debug.Log($"Switched to camera: {selectedCamera.niceName}");
+        }
+
+            ndiApp.currentIP = selectedCamera.viscaIp;
+            Debug.Log($"NDIViewerApp currentIP set to: {ndiApp.currentIP}");
+
+        // Notify the VISCA controller so the sender is created
+        var viscaController = FindObjectOfType<ViscaControlPanelController>();
+       
+            viscaController.OnCameraSelected(selectedCamera);
+            Debug.Log("ViscaControlPanelController.OnCameraSelected invoked from gamepad selection.");
     }
 } 

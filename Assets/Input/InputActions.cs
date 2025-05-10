@@ -37,6 +37,15 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""movePresets"",
+                    ""type"": ""Button"",
+                    ""id"": ""89fc19a8-ad20-4e2c-b359-b77ce0c5fcec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""selectLeftCamera"",
                     ""type"": ""Button"",
                     ""id"": ""243d11fd-bf70-4722-92d7-1567e45c5c3e"",
@@ -49,6 +58,33 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""name"": ""selectRightCamera"",
                     ""type"": ""Button"",
                     ""id"": ""04ff09c1-96ec-456a-92e5-683b45d8e301"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""zoomCamera"",
+                    ""type"": ""Value"",
+                    ""id"": ""cec84824-1c3f-4d39-891c-d1e28a13ca0e"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Save Preset"",
+                    ""type"": ""Button"",
+                    ""id"": ""d57800c4-db1f-4449-972a-7eab5c640d20"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Execute Preset"",
+                    ""type"": ""Button"",
+                    ""id"": ""eddb8ef7-bede-4c63-aa1a-089d645c0083"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -88,6 +124,83 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""action"": ""selectRightCamera"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""837b4850-8e94-4080-9554-acee442f95be"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""zoomCamera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""59c1a13a-a957-42f4-9b39-51c237f6ef74"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Save Preset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""aa4ac144-0666-47f5-b2b9-fbde210c860c"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Execute Preset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1a113aa7-3539-4d08-9cef-fb1abb7cf9ef"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""movePresets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""77715de7-7145-423a-b1b6-448ae49f6f09"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""movePresets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""957c84b1-e9cb-43a4-ab7d-3db3f287f710"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""movePresets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b9c9cc2a-bff8-40d1-b399-c1877bbf79de"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""movePresets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -97,8 +210,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         // GameController
         m_GameController = asset.FindActionMap("GameController", throwIfNotFound: true);
         m_GameController_moveCamera = m_GameController.FindAction("moveCamera", throwIfNotFound: true);
+        m_GameController_movePresets = m_GameController.FindAction("movePresets", throwIfNotFound: true);
         m_GameController_selectLeftCamera = m_GameController.FindAction("selectLeftCamera", throwIfNotFound: true);
         m_GameController_selectRightCamera = m_GameController.FindAction("selectRightCamera", throwIfNotFound: true);
+        m_GameController_zoomCamera = m_GameController.FindAction("zoomCamera", throwIfNotFound: true);
+        m_GameController_SavePreset = m_GameController.FindAction("Save Preset", throwIfNotFound: true);
+        m_GameController_ExecutePreset = m_GameController.FindAction("Execute Preset", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -161,15 +278,23 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_GameController;
     private List<IGameControllerActions> m_GameControllerActionsCallbackInterfaces = new List<IGameControllerActions>();
     private readonly InputAction m_GameController_moveCamera;
+    private readonly InputAction m_GameController_movePresets;
     private readonly InputAction m_GameController_selectLeftCamera;
     private readonly InputAction m_GameController_selectRightCamera;
+    private readonly InputAction m_GameController_zoomCamera;
+    private readonly InputAction m_GameController_SavePreset;
+    private readonly InputAction m_GameController_ExecutePreset;
     public struct GameControllerActions
     {
         private @InputActions m_Wrapper;
         public GameControllerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @moveCamera => m_Wrapper.m_GameController_moveCamera;
+        public InputAction @movePresets => m_Wrapper.m_GameController_movePresets;
         public InputAction @selectLeftCamera => m_Wrapper.m_GameController_selectLeftCamera;
         public InputAction @selectRightCamera => m_Wrapper.m_GameController_selectRightCamera;
+        public InputAction @zoomCamera => m_Wrapper.m_GameController_zoomCamera;
+        public InputAction @SavePreset => m_Wrapper.m_GameController_SavePreset;
+        public InputAction @ExecutePreset => m_Wrapper.m_GameController_ExecutePreset;
         public InputActionMap Get() { return m_Wrapper.m_GameController; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -182,12 +307,24 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @moveCamera.started += instance.OnMoveCamera;
             @moveCamera.performed += instance.OnMoveCamera;
             @moveCamera.canceled += instance.OnMoveCamera;
+            @movePresets.started += instance.OnMovePresets;
+            @movePresets.performed += instance.OnMovePresets;
+            @movePresets.canceled += instance.OnMovePresets;
             @selectLeftCamera.started += instance.OnSelectLeftCamera;
             @selectLeftCamera.performed += instance.OnSelectLeftCamera;
             @selectLeftCamera.canceled += instance.OnSelectLeftCamera;
             @selectRightCamera.started += instance.OnSelectRightCamera;
             @selectRightCamera.performed += instance.OnSelectRightCamera;
             @selectRightCamera.canceled += instance.OnSelectRightCamera;
+            @zoomCamera.started += instance.OnZoomCamera;
+            @zoomCamera.performed += instance.OnZoomCamera;
+            @zoomCamera.canceled += instance.OnZoomCamera;
+            @SavePreset.started += instance.OnSavePreset;
+            @SavePreset.performed += instance.OnSavePreset;
+            @SavePreset.canceled += instance.OnSavePreset;
+            @ExecutePreset.started += instance.OnExecutePreset;
+            @ExecutePreset.performed += instance.OnExecutePreset;
+            @ExecutePreset.canceled += instance.OnExecutePreset;
         }
 
         private void UnregisterCallbacks(IGameControllerActions instance)
@@ -195,12 +332,24 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @moveCamera.started -= instance.OnMoveCamera;
             @moveCamera.performed -= instance.OnMoveCamera;
             @moveCamera.canceled -= instance.OnMoveCamera;
+            @movePresets.started -= instance.OnMovePresets;
+            @movePresets.performed -= instance.OnMovePresets;
+            @movePresets.canceled -= instance.OnMovePresets;
             @selectLeftCamera.started -= instance.OnSelectLeftCamera;
             @selectLeftCamera.performed -= instance.OnSelectLeftCamera;
             @selectLeftCamera.canceled -= instance.OnSelectLeftCamera;
             @selectRightCamera.started -= instance.OnSelectRightCamera;
             @selectRightCamera.performed -= instance.OnSelectRightCamera;
             @selectRightCamera.canceled -= instance.OnSelectRightCamera;
+            @zoomCamera.started -= instance.OnZoomCamera;
+            @zoomCamera.performed -= instance.OnZoomCamera;
+            @zoomCamera.canceled -= instance.OnZoomCamera;
+            @SavePreset.started -= instance.OnSavePreset;
+            @SavePreset.performed -= instance.OnSavePreset;
+            @SavePreset.canceled -= instance.OnSavePreset;
+            @ExecutePreset.started -= instance.OnExecutePreset;
+            @ExecutePreset.performed -= instance.OnExecutePreset;
+            @ExecutePreset.canceled -= instance.OnExecutePreset;
         }
 
         public void RemoveCallbacks(IGameControllerActions instance)
@@ -221,7 +370,11 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     public interface IGameControllerActions
     {
         void OnMoveCamera(InputAction.CallbackContext context);
+        void OnMovePresets(InputAction.CallbackContext context);
         void OnSelectLeftCamera(InputAction.CallbackContext context);
         void OnSelectRightCamera(InputAction.CallbackContext context);
+        void OnZoomCamera(InputAction.CallbackContext context);
+        void OnSavePreset(InputAction.CallbackContext context);
+        void OnExecutePreset(InputAction.CallbackContext context);
     }
 }
