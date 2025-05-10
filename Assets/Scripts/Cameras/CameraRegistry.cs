@@ -184,14 +184,17 @@ public class CameraRegistry
     /// <param name="camera">The camera to activate</param>
     public void SetActiveCamera(CameraInfo camera)
     {
-        Debug.Log($"Setting active camera: {(camera != null ? camera.niceName : "null")}");
-
-        var viscaController = UnityEngine.Object.FindObjectOfType<ViscaControlPanelController>();
-        if (viscaController != null) {
-            viscaController.InitializePTZControls(camera);
-        } else {
-            Debug.LogWarning("ViscaControlPanelController not found in scene");
+        // Debug.Log($"Setting active camera: {(camera != null ? camera.niceName : "null")}");
+        
+        // Deactivate all cameras first
+        foreach (var cam in cameras)
+        {
+            cam.isActive = (cam == camera);
         }
+    
+        
+        // Trigger camera selected event
+        OnCameraSelected?.Invoke(camera);
     }
    
     public void UpdateCameraName(CameraInfo camera, string newName)

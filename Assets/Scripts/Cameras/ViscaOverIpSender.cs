@@ -35,13 +35,8 @@ public class ViscaOverIpSender : System.IDisposable
         if (!string.IsNullOrEmpty(cameraInfo.viscaIp))
         {
             cameraIp = cameraInfo.viscaIp;
-        }
-        else
-        {
-            // Try to get it from the static property
-            cameraIp = NDIViewerApp.ActiveCameraIP != "Not Set" ? 
-                NDIViewerApp.ActiveCameraIP : "192.168.1.100";
-        }
+            Debug.Log($"Using IP from camera info: {cameraIp}");
+        }   
         
         CreateEndPoint();
         Debug.Log($"VISCA sender created for {cameraInfo.niceName} ({cameraIp}:{cameraPort})");
@@ -120,6 +115,110 @@ public class ViscaOverIpSender : System.IDisposable
     public async Task ZoomStop()
     {
         await SendPacketAsync(ViscaCommands.ZoomStopCommand());
+    }
+
+    // Focus Control Methods
+    public async Task FocusNear()
+    {
+        await SendPacketAsync(ViscaCommands.FocusNearCommand());
+    }
+
+    public async Task FocusFar()
+    {
+        await SendPacketAsync(ViscaCommands.FocusFarCommand());
+    }
+
+    public async Task FocusStop()
+    {
+        await SendPacketAsync(ViscaCommands.FocusStopCommand());
+    }
+
+    public async Task FocusAuto()
+    {
+        await SendPacketAsync(ViscaCommands.FocusAutoCommand());
+    }
+
+    public async Task FocusManual()
+    {
+        await SendPacketAsync(ViscaCommands.FocusManualCommand());
+    }
+
+    public async Task FocusOnePush()
+    {
+        await SendPacketAsync(ViscaCommands.FocusOnePushCommand());
+    }
+
+    public async Task ZoomFocusDirect(int zoomPosition, int focusPosition)
+    {
+        await SendPacketAsync(ViscaCommands.ZoomFocusDirectCommand(zoomPosition, focusPosition));
+    }
+
+    // White Balance Methods
+    public async Task WhiteBalanceAuto()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceAutoCommand());
+    }
+
+    public async Task WhiteBalanceIndoor()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceIndoorCommand());
+    }
+
+    public async Task WhiteBalanceOutdoor()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceOutdoorCommand());
+    }
+
+    public async Task WhiteBalanceOnePush()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceOnePushCommand());
+    }
+
+    public async Task WhiteBalanceATW()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceATWCommand());
+    }
+
+    public async Task WhiteBalanceOnePushTrigger()
+    {
+        await SendPacketAsync(ViscaCommands.WhiteBalanceOnePushTriggerCommand());
+    }
+
+    // Exposure Methods
+    public async Task ExposureFullAuto()
+    {
+        await SendPacketAsync(ViscaCommands.ExposureFullAutoCommand());
+    }
+
+    public async Task ExposureManual()
+    {
+        await SendPacketAsync(ViscaCommands.ExposureManualCommand());
+    }
+
+    public async Task ExposureShutterPriority()
+    {
+        await SendPacketAsync(ViscaCommands.ExposureShutterPriorityCommand());
+    }
+
+    public async Task ExposureIrisPriority()
+    {
+        await SendPacketAsync(ViscaCommands.ExposureIrisPriorityCommand());
+    }
+
+    // Preset Methods
+    public async Task PresetRecall(byte presetNumber)
+    {
+        await SendPacketAsync(ViscaCommands.PresetRecallCommand(presetNumber));
+    }
+
+    public async Task PresetSet(byte presetNumber)
+    {
+        await SendPacketAsync(ViscaCommands.PresetSetCommand(presetNumber));
+    }
+
+    public async Task PresetReset(byte presetNumber)
+    {
+        await SendPacketAsync(ViscaCommands.PresetResetCommand(presetNumber));
     }
 
     private async Task SendPacketAsync(byte[] packet)
