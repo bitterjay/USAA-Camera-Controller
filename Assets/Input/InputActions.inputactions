@@ -1,0 +1,74 @@
+{
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "GameController",
+            "id": "ce8de0c1-f8a2-4591-b34d-9850fe84ae66",
+            "actions": [
+                {
+                    "name": "moveCamera",
+                    "type": "Value",
+                    "id": "db827366-dfed-4769-ac4e-81123f35c8c8",
+                    "expectedControlType": "Vector2",
+                    "processors": "StickDeadzone",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "selectLeftCamera",
+                    "type": "Button",
+                    "id": "243d11fd-bf70-4722-92d7-1567e45c5c3e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "selectRightCamera",
+                    "type": "Button",
+                    "id": "04ff09c1-96ec-456a-92e5-683b45d8e301",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4e340cba-1a31-4e73-b3f6-b9cb47d2f19d",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "moveCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a201bc1-25d7-425f-bd34-38fa53ca76e1",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "selectLeftCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6cdb4ce9-ee65-45f9-a956-2688d4fc5aa5",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "selectRightCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

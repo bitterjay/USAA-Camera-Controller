@@ -152,9 +152,9 @@ public class ViscaControlPanelController : MonoBehaviour
         // Set the selected camera as active
         activeCamera = camera;
         
-        Debug.Log($"======================================");
+        // Debug.Log($"======================================");
         Debug.Log($"CAMERA SELECTED: {camera.niceName}, IP: {camera.viscaIp}");
-        Debug.Log($"======================================");
+        // Debug.Log($"======================================");
         
         // Create a new sender with the camera's info
         if (viscaSender != null)

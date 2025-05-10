@@ -20,7 +20,7 @@ MonoBehaviour:
   maxAutoColumns: 4
   maxAutoRows: 2
   autoSizeCells: 0
-  manualCellWidth: 444.2
+  manualCellWidth: 530.6
   maintainAspectRatio: 1
   manualCellHeight: 180
   tileBorderColor: {r: 1, g: 1, b: 1, a: 1}
