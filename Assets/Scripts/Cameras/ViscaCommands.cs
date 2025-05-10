@@ -218,4 +218,37 @@ public static class ViscaCommands
         if (presetNumber > 7) presetNumber = 7; // Limit to 8 presets (0-7)
         return new byte[] { 0x81, 0x01, 0x04, 0x3F, 0x00, presetNumber, 0xFF };
     }
+
+    // Diagonal Pan/Tilt Commands
+    /// <summary>
+    /// Pan and tilt up-left (diagonal).
+    /// </summary>
+    public static byte[] PanTiltUpLeftCommand(byte panSpeed = DEFAULT_PAN_SPEED, byte tiltSpeed = DEFAULT_PAN_SPEED)
+    {
+        return PanTiltCommand(isLeft: true, isRight: false, isUp: true, isDown: false, panSpeed, tiltSpeed);
+    }
+
+    /// <summary>
+    /// Pan and tilt up-right (diagonal).
+    /// </summary>
+    public static byte[] PanTiltUpRightCommand(byte panSpeed = DEFAULT_PAN_SPEED, byte tiltSpeed = DEFAULT_PAN_SPEED)
+    {
+        return PanTiltCommand(isLeft: false, isRight: true, isUp: true, isDown: false, panSpeed, tiltSpeed);
+    }
+
+    /// <summary>
+    /// Pan and tilt down-left (diagonal).
+    /// </summary>
+    public static byte[] PanTiltDownLeftCommand(byte panSpeed = DEFAULT_PAN_SPEED, byte tiltSpeed = DEFAULT_PAN_SPEED)
+    {
+        return PanTiltCommand(isLeft: true, isRight: false, isUp: false, isDown: true, panSpeed, tiltSpeed);
+    }
+
+    /// <summary>
+    /// Pan and tilt down-right (diagonal).
+    /// </summary>
+    public static byte[] PanTiltDownRightCommand(byte panSpeed = DEFAULT_PAN_SPEED, byte tiltSpeed = DEFAULT_PAN_SPEED)
+    {
+        return PanTiltCommand(isLeft: false, isRight: true, isUp: false, isDown: true, panSpeed, tiltSpeed);
+    }
 } 

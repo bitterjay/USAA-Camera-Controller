@@ -92,6 +92,26 @@ public class ViscaOverIpSender : System.IDisposable
         await SendPacketAsync(ViscaCommands.PanTiltCommand(false, false, false, true, 0x00, speed));
     }
 
+    public async Task PanTiltUpLeft(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED)
+    {
+        await SendPacketAsync(ViscaCommands.PanTiltUpLeftCommand(panSpeed, tiltSpeed));
+    }
+
+    public async Task PanTiltUpRight(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED)
+    {
+        await SendPacketAsync(ViscaCommands.PanTiltUpRightCommand(panSpeed, tiltSpeed));
+    }
+
+    public async Task PanTiltDownLeft(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED)
+    {
+        await SendPacketAsync(ViscaCommands.PanTiltDownLeftCommand(panSpeed, tiltSpeed));
+    }
+
+    public async Task PanTiltDownRight(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED)
+    {
+        await SendPacketAsync(ViscaCommands.PanTiltDownRightCommand(panSpeed, tiltSpeed));
+    }
+
     public async Task ZoomIn(byte speed = ViscaCommands.DEFAULT_ZOOM_SPEED)
     {
         await SendPacketAsync(ViscaCommands.ZoomCommand(true, false, speed));
