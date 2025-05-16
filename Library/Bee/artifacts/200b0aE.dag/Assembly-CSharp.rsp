@@ -371,6 +371,8 @@
 "Assets/Scripts/UI/CameraTileView.cs"
 "Assets/Scripts/UI/ControlsOverlay.cs"
 "Assets/Scripts/UI/GridSettingsPopup.cs"
+"Assets/Scripts/UI/PresetSnapshotGrid.cs"
+"Assets/Scripts/UI/PresetSnapshotManager.cs"
 "Assets/Scripts/UI/StatusBarView.cs"
 "Assets/Scripts/UI/UIFactory.cs"
 "Assets/Scripts/UI/ViscaControlPanelController.cs"

@@ -175,6 +175,7 @@ MonoBehaviour:
   globalGearIconTexture: {fileID: 2800000, guid: 1f774273406b74ba490f3677ae901bd8, type: 3}
   cameraGearIconTexture: {fileID: 2800000, guid: 1f774273406b74ba490f3677ae901bd8, type: 3}
   closeIconTexture: {fileID: 0}
+  eyeballIconTexture: {fileID: 2800000, guid: 842abe5baecf246f18779426f193e388, type: 3}
 --- !u!114 &35150462
 MonoBehaviour:
   m_ObjectHideFlags: 0

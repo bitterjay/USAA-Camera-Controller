@@ -57,6 +57,7 @@ public class CameraFullscreenOverlay : MonoBehaviour
 
     public void Show(CameraInfo camera)
     {
+        Debug.Log($"[CameraFullscreenOverlay] Show called for camera: {(camera != null ? camera.niceName : "null")}");
         currentCamera = camera;
         UpdateVideoTexture();
         overlayCanvas.enabled = true;
@@ -65,12 +66,14 @@ public class CameraFullscreenOverlay : MonoBehaviour
 
     public void Hide()
     {
+        Debug.Log("[CameraFullscreenOverlay] Hide called");
         overlayCanvas.enabled = false;
         isShown = false;
     }
 
     public void Toggle(CameraInfo camera)
     {
+        Debug.Log($"[CameraFullscreenOverlay] Toggle called. isShown={isShown}, camera={(camera != null ? camera.niceName : "null")}");
         if (isShown)
             Hide();
         else

@@ -46,6 +46,24 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""whiteBalanceOnePush"",
+                    ""type"": ""Button"",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000004"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""focusOnePush"",
+                    ""type"": ""Button"",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000003"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""selectLeftCamera"",
                     ""type"": ""Button"",
                     ""id"": ""243d11fd-bf70-4722-92d7-1567e45c5c3e"",
@@ -100,27 +118,27 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""focusOnePush"",
-                    ""type"": ""Button"",
-                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000003"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""whiteBalanceOnePush"",
-                    ""type"": ""Button"",
-                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000004"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""showControls"",
                     ""type"": ""Button"",
                     ""id"": ""c63c0cf9-21af-47d4-ad75-05bb2dcee5b4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""cyclePresets"",
+                    ""type"": ""Button"",
+                    ""id"": ""e4721340-3202-49c0-a628-e2f9a4f9ebc8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""fullscreenOverlay"",
+                    ""type"": ""Button"",
+                    ""id"": ""5b571ef0-193e-489f-814e-ceeaeafb4915"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -175,7 +193,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""59c1a13a-a957-42f4-9b39-51c237f6ef74"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""path"": ""<Gamepad>/buttonWest"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -186,7 +204,7 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""aa4ac144-0666-47f5-b2b9-fbde210c860c"",
-                    ""path"": """",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -251,6 +269,39 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""daee5ea4-4bba-4cec-9bbb-46b46f000353"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""showControls"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6d59c8e8-a856-443b-b758-825e6e3d782e"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""cyclePresets"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0ff129dd-c2e5-4456-9659-58ece4255275"",
+                    ""path"": ""<Gamepad>/rightStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""focusOnePush"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""17812611-3a68-463b-a88b-a5e96e3b775d"",
                     ""path"": ""<Gamepad>/leftStickPress"",
                     ""interactions"": """",
@@ -262,12 +313,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""daee5ea4-4bba-4cec-9bbb-46b46f000353"",
-                    ""path"": ""<Gamepad>/start"",
+                    ""id"": ""8a60b14f-0c96-4288-b599-abf02a36e676"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""showControls"",
+                    ""action"": ""fullscreenOverlay"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -280,15 +331,17 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_GameController = asset.FindActionMap("GameController", throwIfNotFound: true);
         m_GameController_moveCamera = m_GameController.FindAction("moveCamera", throwIfNotFound: true);
         m_GameController_movePresets = m_GameController.FindAction("movePresets", throwIfNotFound: true);
+        m_GameController_whiteBalanceOnePush = m_GameController.FindAction("whiteBalanceOnePush", throwIfNotFound: true);
+        m_GameController_focusOnePush = m_GameController.FindAction("focusOnePush", throwIfNotFound: true);
         m_GameController_selectLeftCamera = m_GameController.FindAction("selectLeftCamera", throwIfNotFound: true);
         m_GameController_selectRightCamera = m_GameController.FindAction("selectRightCamera", throwIfNotFound: true);
         m_GameController_zoomCamera = m_GameController.FindAction("zoomCamera", throwIfNotFound: true);
         m_GameController_SavePreset = m_GameController.FindAction("Save Preset", throwIfNotFound: true);
         m_GameController_ExecutePreset = m_GameController.FindAction("Execute Preset", throwIfNotFound: true);
         m_GameController_augmentSpeed = m_GameController.FindAction("augmentSpeed", throwIfNotFound: true);
-        m_GameController_focusOnePush = m_GameController.FindAction("focusOnePush", throwIfNotFound: true);
-        m_GameController_whiteBalanceOnePush = m_GameController.FindAction("whiteBalanceOnePush", throwIfNotFound: true);
         m_GameController_showControls = m_GameController.FindAction("showControls", throwIfNotFound: true);
+        m_GameController_cyclePresets = m_GameController.FindAction("cyclePresets", throwIfNotFound: true);
+        m_GameController_fullscreenOverlay = m_GameController.FindAction("fullscreenOverlay", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -352,30 +405,34 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private List<IGameControllerActions> m_GameControllerActionsCallbackInterfaces = new List<IGameControllerActions>();
     private readonly InputAction m_GameController_moveCamera;
     private readonly InputAction m_GameController_movePresets;
+    private readonly InputAction m_GameController_whiteBalanceOnePush;
+    private readonly InputAction m_GameController_focusOnePush;
     private readonly InputAction m_GameController_selectLeftCamera;
     private readonly InputAction m_GameController_selectRightCamera;
     private readonly InputAction m_GameController_zoomCamera;
     private readonly InputAction m_GameController_SavePreset;
     private readonly InputAction m_GameController_ExecutePreset;
     private readonly InputAction m_GameController_augmentSpeed;
-    private readonly InputAction m_GameController_focusOnePush;
-    private readonly InputAction m_GameController_whiteBalanceOnePush;
     private readonly InputAction m_GameController_showControls;
+    private readonly InputAction m_GameController_cyclePresets;
+    private readonly InputAction m_GameController_fullscreenOverlay;
     public struct GameControllerActions
     {
         private @InputActions m_Wrapper;
         public GameControllerActions(@InputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @moveCamera => m_Wrapper.m_GameController_moveCamera;
         public InputAction @movePresets => m_Wrapper.m_GameController_movePresets;
+        public InputAction @whiteBalanceOnePush => m_Wrapper.m_GameController_whiteBalanceOnePush;
+        public InputAction @focusOnePush => m_Wrapper.m_GameController_focusOnePush;
         public InputAction @selectLeftCamera => m_Wrapper.m_GameController_selectLeftCamera;
         public InputAction @selectRightCamera => m_Wrapper.m_GameController_selectRightCamera;
         public InputAction @zoomCamera => m_Wrapper.m_GameController_zoomCamera;
         public InputAction @SavePreset => m_Wrapper.m_GameController_SavePreset;
         public InputAction @ExecutePreset => m_Wrapper.m_GameController_ExecutePreset;
         public InputAction @augmentSpeed => m_Wrapper.m_GameController_augmentSpeed;
-        public InputAction @focusOnePush => m_Wrapper.m_GameController_focusOnePush;
-        public InputAction @whiteBalanceOnePush => m_Wrapper.m_GameController_whiteBalanceOnePush;
         public InputAction @showControls => m_Wrapper.m_GameController_showControls;
+        public InputAction @cyclePresets => m_Wrapper.m_GameController_cyclePresets;
+        public InputAction @fullscreenOverlay => m_Wrapper.m_GameController_fullscreenOverlay;
         public InputActionMap Get() { return m_Wrapper.m_GameController; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -391,6 +448,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @movePresets.started += instance.OnMovePresets;
             @movePresets.performed += instance.OnMovePresets;
             @movePresets.canceled += instance.OnMovePresets;
+            @whiteBalanceOnePush.started += instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.performed += instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.canceled += instance.OnWhiteBalanceOnePush;
+            @focusOnePush.started += instance.OnFocusOnePush;
+            @focusOnePush.performed += instance.OnFocusOnePush;
+            @focusOnePush.canceled += instance.OnFocusOnePush;
             @selectLeftCamera.started += instance.OnSelectLeftCamera;
             @selectLeftCamera.performed += instance.OnSelectLeftCamera;
             @selectLeftCamera.canceled += instance.OnSelectLeftCamera;
@@ -409,15 +472,15 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @augmentSpeed.started += instance.OnAugmentSpeed;
             @augmentSpeed.performed += instance.OnAugmentSpeed;
             @augmentSpeed.canceled += instance.OnAugmentSpeed;
-            @focusOnePush.started += instance.OnFocusOnePush;
-            @focusOnePush.performed += instance.OnFocusOnePush;
-            @focusOnePush.canceled += instance.OnFocusOnePush;
-            @whiteBalanceOnePush.started += instance.OnWhiteBalanceOnePush;
-            @whiteBalanceOnePush.performed += instance.OnWhiteBalanceOnePush;
-            @whiteBalanceOnePush.canceled += instance.OnWhiteBalanceOnePush;
             @showControls.started += instance.OnShowControls;
             @showControls.performed += instance.OnShowControls;
             @showControls.canceled += instance.OnShowControls;
+            @cyclePresets.started += instance.OnCyclePresets;
+            @cyclePresets.performed += instance.OnCyclePresets;
+            @cyclePresets.canceled += instance.OnCyclePresets;
+            @fullscreenOverlay.started += instance.OnFullscreenOverlay;
+            @fullscreenOverlay.performed += instance.OnFullscreenOverlay;
+            @fullscreenOverlay.canceled += instance.OnFullscreenOverlay;
         }
 
         private void UnregisterCallbacks(IGameControllerActions instance)
@@ -428,6 +491,12 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @movePresets.started -= instance.OnMovePresets;
             @movePresets.performed -= instance.OnMovePresets;
             @movePresets.canceled -= instance.OnMovePresets;
+            @whiteBalanceOnePush.started -= instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.performed -= instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.canceled -= instance.OnWhiteBalanceOnePush;
+            @focusOnePush.started -= instance.OnFocusOnePush;
+            @focusOnePush.performed -= instance.OnFocusOnePush;
+            @focusOnePush.canceled -= instance.OnFocusOnePush;
             @selectLeftCamera.started -= instance.OnSelectLeftCamera;
             @selectLeftCamera.performed -= instance.OnSelectLeftCamera;
             @selectLeftCamera.canceled -= instance.OnSelectLeftCamera;
@@ -446,15 +515,15 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @augmentSpeed.started -= instance.OnAugmentSpeed;
             @augmentSpeed.performed -= instance.OnAugmentSpeed;
             @augmentSpeed.canceled -= instance.OnAugmentSpeed;
-            @focusOnePush.started -= instance.OnFocusOnePush;
-            @focusOnePush.performed -= instance.OnFocusOnePush;
-            @focusOnePush.canceled -= instance.OnFocusOnePush;
-            @whiteBalanceOnePush.started -= instance.OnWhiteBalanceOnePush;
-            @whiteBalanceOnePush.performed -= instance.OnWhiteBalanceOnePush;
-            @whiteBalanceOnePush.canceled -= instance.OnWhiteBalanceOnePush;
             @showControls.started -= instance.OnShowControls;
             @showControls.performed -= instance.OnShowControls;
             @showControls.canceled -= instance.OnShowControls;
+            @cyclePresets.started -= instance.OnCyclePresets;
+            @cyclePresets.performed -= instance.OnCyclePresets;
+            @cyclePresets.canceled -= instance.OnCyclePresets;
+            @fullscreenOverlay.started -= instance.OnFullscreenOverlay;
+            @fullscreenOverlay.performed -= instance.OnFullscreenOverlay;
+            @fullscreenOverlay.canceled -= instance.OnFullscreenOverlay;
         }
 
         public void RemoveCallbacks(IGameControllerActions instance)
@@ -476,14 +545,16 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     {
         void OnMoveCamera(InputAction.CallbackContext context);
         void OnMovePresets(InputAction.CallbackContext context);
+        void OnWhiteBalanceOnePush(InputAction.CallbackContext context);
+        void OnFocusOnePush(InputAction.CallbackContext context);
         void OnSelectLeftCamera(InputAction.CallbackContext context);
         void OnSelectRightCamera(InputAction.CallbackContext context);
         void OnZoomCamera(InputAction.CallbackContext context);
         void OnSavePreset(InputAction.CallbackContext context);
         void OnExecutePreset(InputAction.CallbackContext context);
         void OnAugmentSpeed(InputAction.CallbackContext context);
-        void OnFocusOnePush(InputAction.CallbackContext context);
-        void OnWhiteBalanceOnePush(InputAction.CallbackContext context);
         void OnShowControls(InputAction.CallbackContext context);
+        void OnCyclePresets(InputAction.CallbackContext context);
+        void OnFullscreenOverlay(InputAction.CallbackContext context);
     }
 }

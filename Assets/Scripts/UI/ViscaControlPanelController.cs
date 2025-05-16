@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Threading.Tasks;
+using PTZ.UI;
+using System.Collections;
 
 public class ViscaControlPanelController : MonoBehaviour
 {
@@ -15,11 +17,23 @@ public class ViscaControlPanelController : MonoBehaviour
     [SerializeField] private int fallbackPort = 52381;
 
     private string ipAddress;
+    private Coroutine slideCoroutine;
+    private bool isPanelVisible = false;
+    public bool IsPanelVisible => isPanelVisible;
+
+    private VisualElement viscaPanelVE;
 
     private void Awake()
     {
         Debug.Log("ViscaControlPanelController Awake called");
         ipAddress = FindObjectOfType<NDIViewerApp>().currentIP;
+        var uiDoc = GetComponent<UIDocument>();
+        if (uiDoc != null)
+        {
+            var root = uiDoc.rootVisualElement;
+            viscaPanelVE = root.Q(className: "visca-panel");
+            SlidePanel(false, true); // Start hidden
+        }
         // No initialization here - wait for camera selection
     }
     
@@ -766,10 +780,12 @@ public class ViscaControlPanelController : MonoBehaviour
         {
             preset1SetButton.clicked += async () => {
                 if (!isInitialized) return;
-                
                 Debug.Log($"Set Preset 1 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetSet(0) ?? Task.CompletedTask);
+                {
+                    await viscaSender.PresetSet(0);
+                    CaptureAndStorePresetSnapshot(0);
+                }
             };
         }
         else
@@ -785,7 +801,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Reset Preset 1 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetReset(0) ?? Task.CompletedTask);
+                    await viscaSender.PresetReset(0);
             };
         }
         else
@@ -802,7 +818,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Recall Preset 2 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetRecall(1) ?? Task.CompletedTask);
+                    await viscaSender.PresetRecall(1);
             };
         }
         else
@@ -815,10 +831,12 @@ public class ViscaControlPanelController : MonoBehaviour
         {
             preset2SetButton.clicked += async () => {
                 if (!isInitialized) return;
-                
                 Debug.Log($"Set Preset 2 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetSet(1) ?? Task.CompletedTask);
+                {
+                    await viscaSender.PresetSet(1);
+                    CaptureAndStorePresetSnapshot(1);
+                }
             };
         }
         else
@@ -834,7 +852,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Reset Preset 2 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetReset(1) ?? Task.CompletedTask);
+                    await viscaSender.PresetReset(1);
             };
         }
         else
@@ -851,7 +869,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Recall Preset 3 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetRecall(2) ?? Task.CompletedTask);
+                    await viscaSender.PresetRecall(2);
             };
         }
         else
@@ -864,10 +882,12 @@ public class ViscaControlPanelController : MonoBehaviour
         {
             preset3SetButton.clicked += async () => {
                 if (!isInitialized) return;
-                
                 Debug.Log($"Set Preset 3 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetSet(2) ?? Task.CompletedTask);
+                {
+                    await viscaSender.PresetSet(2);
+                    CaptureAndStorePresetSnapshot(2);
+                }
             };
         }
         else
@@ -883,7 +903,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Reset Preset 3 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetReset(2) ?? Task.CompletedTask);
+                    await viscaSender.PresetReset(2);
             };
         }
         else
@@ -900,7 +920,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Recall Preset 4 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetRecall(3) ?? Task.CompletedTask);
+                    await viscaSender.PresetRecall(3);
             };
         }
         else
@@ -913,10 +933,12 @@ public class ViscaControlPanelController : MonoBehaviour
         {
             preset4SetButton.clicked += async () => {
                 if (!isInitialized) return;
-                
                 Debug.Log($"Set Preset 4 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetSet(3) ?? Task.CompletedTask);
+                {
+                    await viscaSender.PresetSet(3);
+                    CaptureAndStorePresetSnapshot(3);
+                }
             };
         }
         else
@@ -932,7 +954,7 @@ public class ViscaControlPanelController : MonoBehaviour
                 
                 Debug.Log($"Reset Preset 4 button clicked");
                 if (EnsureViscaSender())
-                    await (viscaSender?.PresetReset(3) ?? Task.CompletedTask);
+                    await viscaSender.PresetReset(3);
             };
         }
         else
@@ -1147,6 +1169,72 @@ public class ViscaControlPanelController : MonoBehaviour
     public async void ZoomStop() { if (isInitialized && viscaSender != null) await viscaSender.ZoomStop(); }
     public async void FocusOnePush() { if (isInitialized && viscaSender != null) await viscaSender.FocusOnePush(); }
     public async void WhiteBalanceOnePush() { if (isInitialized && viscaSender != null) await viscaSender.WhiteBalanceOnePush(); }
+
+    // Add this method to capture and store a snapshot for the given preset slot
+    private void CaptureAndStorePresetSnapshot(int slot)
+    {
+        if (activeCamera == null || activeCamera.receiver == null) return;
+        var tex = activeCamera.receiver.texture as RenderTexture;
+        if (tex == null) return;
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture.active = tex;
+        Texture2D snap = new Texture2D(tex.width, tex.height, TextureFormat.RGB24, false);
+        snap.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+        snap.Apply();
+        RenderTexture.active = currentRT;
+        PresetSnapshotManager.SetSnapshot(activeCamera, slot, snap);
+        // Notify NDIViewerApp to update the grid
+        var ndiApp = FindObjectOfType<NDIViewerApp>();
+        if (ndiApp != null)
+            ndiApp.OnPresetSet(activeCamera);
+    }
+
+    public async void PresetSet(int idx)
+    {
+        if (isInitialized && viscaSender != null)
+        {
+            await viscaSender.PresetSet((byte)idx);
+            CaptureAndStorePresetSnapshot(idx);
+        }
+    }
+
+    public async void PresetRecall(int idx)
+    {
+        if (isInitialized && viscaSender != null)
+        {
+            await viscaSender.PresetRecall((byte)idx);
+        }
+    }
+
+    public void SlidePanel(bool show, bool instant = false)
+    {
+        if (viscaPanelVE == null) return;
+        if (slideCoroutine != null)
+            StopCoroutine(slideCoroutine);
+        slideCoroutine = StartCoroutine(SlidePanelCoroutine(show, instant));
+    }
+
+    private IEnumerator SlidePanelCoroutine(bool show, bool instant)
+    {
+        if (viscaPanelVE == null) yield break;
+        float duration = instant ? 0f : 0.25f;
+        float elapsed = 0f;
+        float panelWidth = viscaPanelVE.resolvedStyle.width > 0 ? viscaPanelVE.resolvedStyle.width : 600f;
+        float startX = viscaPanelVE.transform.position.x;
+        float endX = show ? 0f : panelWidth + 40f;
+        isPanelVisible = show;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Smoothstep for ease-in-out
+            t = t * t * (3f - 2f * t);
+            float x = Mathf.Lerp(startX, endX, t);
+            viscaPanelVE.style.translate = new StyleTranslate(new Translate(x, 0, 0));
+            yield return null;
+        }
+        viscaPanelVE.style.translate = new StyleTranslate(new Translate(endX, 0, 0));
+    }
 }
 
 public static class TaskExtensions

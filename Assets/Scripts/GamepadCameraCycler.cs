@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
 
 public class GamepadCameraCycler : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class GamepadCameraCycler : MonoBehaviour
     private Vector2 lastZoomDirection = Vector2.zero;
     private bool isZooming = false;
     private const float ZOOM_DEADZONE = 0.3f;
+    private Dictionary<CameraInfo, int> selectedPresetIndices = new Dictionary<CameraInfo, int>();
 
     private void Awake()
     {
@@ -24,10 +26,14 @@ public class GamepadCameraCycler : MonoBehaviour
       
         inputActions.GameController.selectLeftCamera.performed += OnSelectLeftCamera;
         inputActions.GameController.selectRightCamera.performed += OnSelectRightCamera;
-        inputActions.GameController.SavePreset.performed += OnSavePreset;
+        inputActions.GameController.SavePreset.performed += OnSetPreset;
+        inputActions.GameController.ExecutePreset.performed += OnRecallPreset;
         inputActions.GameController.focusOnePush.performed += OnFocusOnePush;
         inputActions.GameController.whiteBalanceOnePush.performed += OnWhiteBalanceOnePush;
         inputActions.GameController.showControls.performed += OnShowControls;
+        inputActions.GameController.cyclePresets.performed += OnSelectPreset;
+        inputActions.GameController.movePresets.performed += OnMovePresetSelection;
+        inputActions.GameController.fullscreenOverlay.performed += OnFullscreenOverlay;
 
         // Get the CameraRegistry instance from the NDIViewerApp
         cameraRegistry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
@@ -38,10 +44,14 @@ public class GamepadCameraCycler : MonoBehaviour
     {
         inputActions.GameController.selectLeftCamera.performed -= OnSelectLeftCamera;
         inputActions.GameController.selectRightCamera.performed -= OnSelectRightCamera;
-        inputActions.GameController.SavePreset.performed -= OnSavePreset;
+        inputActions.GameController.SavePreset.performed -= OnSetPreset;
+        inputActions.GameController.ExecutePreset.performed -= OnRecallPreset;
         inputActions.GameController.focusOnePush.performed -= OnFocusOnePush;
         inputActions.GameController.whiteBalanceOnePush.performed -= OnWhiteBalanceOnePush;
         inputActions.GameController.showControls.performed -= OnShowControls;
+        inputActions.GameController.cyclePresets.performed -= OnSelectPreset;
+        inputActions.GameController.movePresets.performed -= OnMovePresetSelection;
+        inputActions.GameController.fullscreenOverlay.performed -= OnFullscreenOverlay;
         inputActions.Disable();
     }
 
@@ -55,17 +65,26 @@ public class GamepadCameraCycler : MonoBehaviour
         CycleCamera(1);
     }
 
-    private void OnSavePreset(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    private void OnSetPreset(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
     {
-        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null)
+        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null || viscaController == null)
             return;
-        // Ensure overlay exists
-        if (CameraFullscreenOverlay.Instance == null)
-        {
-            var go = new GameObject("CameraFullscreenOverlay");
-            go.AddComponent<CameraFullscreenOverlay>();
-        }
-        CameraFullscreenOverlay.Instance.Toggle(cameraRegistry.ActiveCamera);
+        var cam = cameraRegistry.ActiveCamera;
+        int idx = 0;
+        if (selectedPresetIndices.TryGetValue(cam, out var sel))
+            idx = sel;
+        viscaController.PresetSet(idx);
+    }
+
+    private void OnRecallPreset(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null || viscaController == null)
+            return;
+        var cam = cameraRegistry.ActiveCamera;
+        int idx = 0;
+        if (selectedPresetIndices.TryGetValue(cam, out var sel))
+            idx = sel;
+        viscaController.PresetRecall(idx);
     }
 
     private void OnFocusOnePush(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
@@ -87,6 +106,79 @@ public class GamepadCameraCycler : MonoBehaviour
             go.AddComponent<ControlsOverlay>();
         }
         ControlsOverlay.Instance.Toggle();
+    }
+
+    private void OnSelectPreset(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null)
+            return;
+        var cam = cameraRegistry.ActiveCamera;
+        int idx = 0;
+        if (selectedPresetIndices.TryGetValue(cam, out var prev))
+            idx = (prev + 1) % 4;
+        selectedPresetIndices[cam] = idx;
+        // Update the grid highlight
+        var ndiApp = FindObjectOfType<NDIViewerApp>();
+        if (ndiApp != null && ndiApp.presetSnapshotGrids != null && ndiApp.presetSnapshotGrids.TryGetValue(cam, out var grid))
+        {
+            grid.SetSelectedPreset(idx);
+        }
+    }
+
+    private void OnMovePresetSelection(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null)
+            return;
+        var cam = cameraRegistry.ActiveCamera;
+        int idx = 0;
+        if (selectedPresetIndices.TryGetValue(cam, out var prev))
+            idx = prev;
+
+        string controlName = ctx.control.name;
+        if (controlName == "left")
+            idx = (idx + 3) % 4;
+        else if (controlName == "right")
+            idx = (idx + 1) % 4;
+        else if (controlName == "up")
+            idx = (idx + 2) % 4;
+        else if (controlName == "down")
+            idx = (idx + 2) % 4;
+        else
+            return;
+
+        selectedPresetIndices[cam] = idx;
+        // Update the grid highlight
+        var ndiApp = FindObjectOfType<NDIViewerApp>();
+        if (ndiApp != null && ndiApp.presetSnapshotGrids != null && ndiApp.presetSnapshotGrids.TryGetValue(cam, out var grid))
+        {
+            grid.SetSelectedPreset(idx);
+        }
+    }
+
+    private void OnFullscreenOverlay(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        Debug.Log("[GamepadCameraCycler] Fullscreen overlay input triggered");
+        if (cameraRegistry == null)
+        {
+            Debug.LogWarning("[GamepadCameraCycler] cameraRegistry is null");
+            return;
+        }
+        if (cameraRegistry.ActiveCamera == null)
+        {
+            Debug.LogWarning("[GamepadCameraCycler] ActiveCamera is null");
+            return;
+        }
+        if (CameraFullscreenOverlay.Instance == null)
+        {
+            Debug.LogWarning("[GamepadCameraCycler] CameraFullscreenOverlay.Instance is null! Creating one.");
+            var go = new GameObject("CameraFullscreenOverlay");
+            go.AddComponent<CameraFullscreenOverlay>();
+        }
+        if (CameraFullscreenOverlay.Instance != null)
+        {
+            Debug.Log("[GamepadCameraCycler] Toggling fullscreen overlay for camera: " + cameraRegistry.ActiveCamera.niceName);
+            CameraFullscreenOverlay.Instance.Toggle(cameraRegistry.ActiveCamera);
+        }
     }
 
     private void Update()

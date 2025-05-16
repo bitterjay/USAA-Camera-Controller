@@ -39,3 +39,8 @@ MonoBehaviour:
   settingsPanelHeight: 400
   cameraSettingsPopupWidth: 400
   cameraSettingsPopupHeight: 300
+  presetSnapshotGridAnchorMin: {x: 1, y: 0.5}
+  presetSnapshotGridAnchorMax: {x: 1, y: 0.5}
+  presetSnapshotGridPivot: {x: 1, y: 0.5}
+  presetSnapshotGridSize: {x: 400, y: 230}
+  presetSnapshotGridPosition: {x: -200, y: 0}

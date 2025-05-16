@@ -44,6 +44,13 @@ public class LayoutSettings : ScriptableObject
     [SerializeField] private float cameraSettingsPopupWidth = 400f;
     [SerializeField] private float cameraSettingsPopupHeight = 300f;
 
+    [Header("Preset Snapshot Grid Position")]
+    [SerializeField] private Vector2 presetSnapshotGridAnchorMin = new Vector2(1, 0.5f);
+    [SerializeField] private Vector2 presetSnapshotGridAnchorMax = new Vector2(1, 0.5f);
+    [SerializeField] private Vector2 presetSnapshotGridPivot = new Vector2(1, 0.5f);
+    [SerializeField] private Vector2 presetSnapshotGridSize = new Vector2(400, 230);
+    [SerializeField] private Vector2 presetSnapshotGridPosition = new Vector2(-20, 0);
+
     // Properties
     public float Padding => padding;
     public float AspectRatio => aspectRatio;
@@ -80,4 +87,14 @@ public class LayoutSettings : ScriptableObject
     public float SettingsPanelHeight => settingsPanelHeight;
     public float CameraSettingsPopupWidth => cameraSettingsPopupWidth;
     public float CameraSettingsPopupHeight => cameraSettingsPopupHeight;
+
+    public Vector2 PresetSnapshotGridAnchorMin => presetSnapshotGridAnchorMin;
+    public Vector2 PresetSnapshotGridAnchorMax => presetSnapshotGridAnchorMax;
+    public Vector2 PresetSnapshotGridPivot => presetSnapshotGridPivot;
+    public Vector2 PresetSnapshotGridSize
+    {
+        get => presetSnapshotGridSize;
+        set => presetSnapshotGridSize = value;
+    }
+    public Vector2 PresetSnapshotGridPosition => presetSnapshotGridPosition;
 } 

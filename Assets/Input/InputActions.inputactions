@@ -24,6 +24,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "whiteBalanceOnePush",
+                    "type": "Button",
+                    "id": "b1e1c1a2-0000-4000-8000-000000000004",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "focusOnePush",
+                    "type": "Button",
+                    "id": "b1e1c1a2-0000-4000-8000-000000000003",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "selectLeftCamera",
                     "type": "Button",
                     "id": "243d11fd-bf70-4722-92d7-1567e45c5c3e",
@@ -78,27 +96,27 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "focusOnePush",
-                    "type": "Button",
-                    "id": "b1e1c1a2-0000-4000-8000-000000000003",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "whiteBalanceOnePush",
-                    "type": "Button",
-                    "id": "b1e1c1a2-0000-4000-8000-000000000004",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "showControls",
                     "type": "Button",
                     "id": "c63c0cf9-21af-47d4-ad75-05bb2dcee5b4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "cyclePresets",
+                    "type": "Button",
+                    "id": "e4721340-3202-49c0-a628-e2f9a4f9ebc8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "fullscreenOverlay",
+                    "type": "Button",
+                    "id": "5b571ef0-193e-489f-814e-ceeaeafb4915",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -153,7 +171,7 @@
                 {
                     "name": "",
                     "id": "59c1a13a-a957-42f4-9b39-51c237f6ef74",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -164,7 +182,7 @@
                 {
                     "name": "",
                     "id": "aa4ac144-0666-47f5-b2b9-fbde210c860c",
-                    "path": "",
+                    "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -229,6 +247,39 @@
                 },
                 {
                     "name": "",
+                    "id": "daee5ea4-4bba-4cec-9bbb-46b46f000353",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "showControls",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6d59c8e8-a856-443b-b758-825e6e3d782e",
+                    "path": "<Gamepad>/select",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cyclePresets",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0ff129dd-c2e5-4456-9659-58ece4255275",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "focusOnePush",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "17812611-3a68-463b-a88b-a5e96e3b775d",
                     "path": "<Gamepad>/leftStickPress",
                     "interactions": "",
@@ -240,12 +291,12 @@
                 },
                 {
                     "name": "",
-                    "id": "daee5ea4-4bba-4cec-9bbb-46b46f000353",
-                    "path": "<Gamepad>/start",
+                    "id": "8a60b14f-0c96-4288-b599-abf02a36e676",
+                    "path": "<Gamepad>/buttonNorth",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "showControls",
+                    "action": "fullscreenOverlay",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

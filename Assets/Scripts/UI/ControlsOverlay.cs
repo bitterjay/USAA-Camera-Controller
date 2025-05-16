@@ -83,9 +83,14 @@ public class ControlsOverlay : MonoBehaviour
             "Right Stick: Zoom In/Out",
             "Right Trigger: Fast Movement/Zoom",
             "LB/RB: Cycle Cameras",
-            "Triangle (Y): Fullscreen Camera Preview",
+            "D-Pad Left/Right: Move Preset Selection Left/Right",
+            "D-Pad Up/Down: Move Preset Selection Up/Down",
+            "A (South): Set Selected Preset",
+            "X (West): Recall Selected Preset",
+            "Y (Triangle): Fullscreen Camera Preview",
             "R3 (Right Stick Press): Focus One Push",
             "L3 (Left Stick Press): White Balance One Push",
+            "Select/Cycle Preset Button: Cycle Preset Selection",
             "Start: Show/Hide Controls",
             "B/Circle: Close Controls Overlay"
         };

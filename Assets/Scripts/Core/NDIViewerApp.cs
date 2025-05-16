@@ -6,6 +6,7 @@ using Klak.Ndi;
 using System.Linq;
 using UnityEngine.EventSystems;
 using System.Reflection;
+using PTZ.UI;
 
 /// <summary>
 /// Main application controller for the NDI Viewer
@@ -35,6 +36,8 @@ public class NDIViewerApp : MonoBehaviour
     [Tooltip("PNG/Texture for close (X) button on panels")]
     [SerializeField] private Texture2D closeIconTexture;
     
+    [SerializeField] private Texture2D eyeballIconTexture;
+    
     // Core components
     private CameraRegistry cameraRegistry;
     private GridLayoutController gridController;
@@ -54,6 +57,13 @@ public class NDIViewerApp : MonoBehaviour
     private bool autoDiscoverFired = false;
     
     private Button hamburgerButton;
+    private Button controlsToggleButton;
+    private GameObject viscaPanelObj;
+    
+    public Dictionary<CameraInfo, PresetSnapshotGrid> presetSnapshotGrids = new Dictionary<CameraInfo, PresetSnapshotGrid>();
+    
+    private ViscaControlPanelController viscaPanelController;
+    private bool viscaPanelVisible = false;
     
     private void Start()
     {
@@ -76,8 +86,24 @@ public class NDIViewerApp : MonoBehaviour
         // Create settings button
         CreateGlobalSettingsButton();
         
+        // Create controls toggle button
+        CreateControlsToggleButton();
+        
         // Start the refresh loop
         StartCoroutine(RefreshSourcesLoop());
+        
+        // Find the ViscaControlPanelController and start hidden (slide off screen)
+        if (viscaPanelObj == null)
+        {
+            viscaPanelObj = GameObject.FindObjectOfType<ViscaControlPanelController>()?.gameObject;
+        }
+        if (viscaPanelObj != null)
+        {
+            viscaPanelController = viscaPanelObj.GetComponent<ViscaControlPanelController>();
+            viscaPanelObj.SetActive(true); // Keep active for input
+            viscaPanelController?.SlidePanel(false, true); // Hide instantly at start
+            viscaPanelVisible = false;
+        }
     }
     
     private void Update()
@@ -109,6 +135,10 @@ public class NDIViewerApp : MonoBehaviour
         
         // // Verify that the active camera's IP matches what we expect based on its name
         // VerifyActiveCameraIP();
+        
+        // Always keep the controls button on top
+        if (controlsToggleButton != null)
+            controlsToggleButton.transform.SetAsLastSibling();
     }
     
     #region Setup Methods
@@ -220,14 +250,56 @@ public class NDIViewerApp : MonoBehaviour
             layoutSettings.ManualColumns,
             layoutSettings.ManualRows,
             layoutSettings.ManualCellWidth,
-            (cols, rows, cellWidth) => {
+            layoutSettings.PresetSnapshotGridSize.x,
+            (cols, rows, cellWidth, presetGridSize) => {
                 typeof(LayoutSettings).GetField("manualColumns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, cols);
                 typeof(LayoutSettings).GetField("manualRows", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, rows);
                 typeof(LayoutSettings).GetField("manualCellWidth", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, cellWidth);
+                layoutSettings.PresetSnapshotGridSize = new Vector2(presetGridSize, presetGridSize * 0.575f);
                 if (gridController != null && cameraRegistry != null)
                     gridController.ConfigureLayout(cameraRegistry.Cameras.Count);
+                // Reposition and resize all preset grids
+                int idx = 0;
+                foreach (var kvp in presetSnapshotGrids)
+                {
+                    var gridRT = kvp.Value.GetComponent<RectTransform>();
+                    gridRT.sizeDelta = layoutSettings.PresetSnapshotGridSize;
+                    gridRT.anchoredPosition = new Vector2(20 + idx * (layoutSettings.PresetSnapshotGridSize.x + 20), 20);
+                    kvp.Value.UpdateGridSize(layoutSettings.PresetSnapshotGridSize);
+                    idx++;
+                }
             }
         );
+    }
+    
+    private void CreateControlsToggleButton()
+    {
+        // If not assigned in inspector, try to load from Resources
+        Texture2D icon = eyeballIconTexture;
+        if (icon == null)
+        {
+            icon = Resources.Load<Texture2D>("eyeball-icon");
+        }
+        controlsToggleButton = UIFactory.CreateIconButton(
+            mainCanvas.transform,
+            icon,
+            null, // No label
+            new Vector2(1, 0), // bottom right
+            TextAnchor.MiddleCenter,
+            new Vector2(48, 48)
+        );
+        var rt = controlsToggleButton.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1, 0);
+        rt.anchorMax = new Vector2(1, 0);
+        rt.pivot = new Vector2(1, 0);
+        rt.anchoredPosition = new Vector2(-layoutSettings.Padding, layoutSettings.Padding);
+        // Tint icon white
+        var img = controlsToggleButton.GetComponent<UnityEngine.UI.Image>();
+        img.color = Color.white;
+        img.type = UnityEngine.UI.Image.Type.Simple;
+        img.preserveAspect = true;
+        controlsToggleButton.transform.SetAsLastSibling();
+        controlsToggleButton.onClick.AddListener(ToggleViscaPanel);
     }
     
     #endregion
@@ -236,21 +308,14 @@ public class NDIViewerApp : MonoBehaviour
     
     private void OnCameraAdded(CameraInfo camera)
     {
-       
         // Create tile and add to dictionary
         CreateCameraTile(camera);
-        
+        // Create a preset snapshot grid for this camera
+        CreatePresetSnapshotGridForCamera(camera);
         // Update the grid layout
         gridController.ConfigureLayout(cameraRegistry.Cameras.Count);
-        
         // Update settings panel if open
         RefreshSettingsList();
-        
-        // // If this is the only camera and none active, make it active
-        // if (cameraRegistry.Cameras.Count == 1 && cameraRegistry.ActiveCamera == null)
-        // {
-        //     SetActiveCamera(camera);
-        // }
     }
     
     private void OnCameraRemoved(CameraInfo camera)
@@ -261,10 +326,14 @@ public class NDIViewerApp : MonoBehaviour
             Destroy(tile.gameObject);
             cameraTiles.Remove(camera);
         }
-        
+        // Remove preset snapshot grid
+        if (presetSnapshotGrids.TryGetValue(camera, out var grid))
+        {
+            Destroy(grid.gameObject);
+            presetSnapshotGrids.Remove(camera);
+        }
         // Update the grid layout
         gridController.ConfigureLayout(cameraRegistry.Cameras.Count);
-        
         // Update settings panel if open
         RefreshSettingsList();
     }
@@ -368,12 +437,60 @@ public class NDIViewerApp : MonoBehaviour
                 kvp.Value.SetActive(isThisCamera);
             }
         }
+        // Update preset grid highlights
+        if (presetSnapshotGrids != null)
+        {
+            foreach (var kvp in presetSnapshotGrids)
+            {
+                bool isThisCamera = kvp.Key == camera;
+                kvp.Value.SetGridActive(isThisCamera);
+            }
+        }
         
         // Update status bar
         if (statusBar != null)
         {
             statusBar.SetActiveCamera(camera);
         }
+    }
+    
+    private void CreatePresetSnapshotGridForCamera(CameraInfo camera)
+    {
+        var gridObj = new GameObject($"PresetSnapshotGrid_{camera.niceName}", typeof(RectTransform), typeof(PresetSnapshotGrid));
+        gridObj.transform.SetParent(mainCanvas.transform, false);
+        var gridRT = gridObj.GetComponent<RectTransform>();
+        // Arrange in a row at the bottom left, spaced by 20px
+        int index = cameraRegistry.Cameras.ToList().IndexOf(camera);
+        float gridWidth = layoutSettings.PresetSnapshotGridSize.x;
+        float gridHeight = layoutSettings.PresetSnapshotGridSize.y;
+        gridRT.anchorMin = new Vector2(0, 0);
+        gridRT.anchorMax = new Vector2(0, 0);
+        gridRT.pivot = new Vector2(0, 0);
+        gridRT.sizeDelta = layoutSettings.PresetSnapshotGridSize;
+        gridRT.anchoredPosition = new Vector2(20 + index * (gridWidth + 20), 20);
+        var grid = gridObj.GetComponent<PresetSnapshotGrid>();
+        grid.ShowForCamera(camera);
+        // Add camera name label as a child of the grid's panelObj
+        var panelObjField = typeof(PresetSnapshotGrid).GetField("panelObj", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var panelObj = panelObjField?.GetValue(grid) as GameObject;
+        if (panelObj != null)
+        {
+            var labelObj = new GameObject("CameraNameLabel", typeof(RectTransform), typeof(UnityEngine.UI.Text));
+            labelObj.transform.SetParent(panelObj.transform, false);
+            var labelRT = labelObj.GetComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0, 1);
+            labelRT.anchorMax = new Vector2(0, 1);
+            labelRT.pivot = new Vector2(0, 1);
+            labelRT.sizeDelta = new Vector2(gridWidth, 20);
+            labelRT.anchoredPosition = new Vector2(4, 4);
+            var label = labelObj.GetComponent<UnityEngine.UI.Text>();
+            label.text = camera.niceName;
+            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            label.fontSize = 14;
+            label.color = Color.white;
+            label.alignment = TextAnchor.UpperLeft;
+        }
+        presetSnapshotGrids[camera] = grid;
     }
     
     private IEnumerator RefreshSourcesLoop()
@@ -657,5 +774,28 @@ public class NDIViewerApp : MonoBehaviour
     public CameraRegistry GetCameraRegistry()
     {
         return cameraRegistry;
+    }
+
+    // When a preset is set, update the relevant grid
+    public void OnPresetSet(CameraInfo camera)
+    {
+        if (presetSnapshotGrids.TryGetValue(camera, out var grid))
+        {
+            grid.ShowForCamera(camera);
+        }
+    }
+
+    private void ToggleViscaPanel()
+    {
+        if (viscaPanelObj == null)
+        {
+            viscaPanelObj = GameObject.FindObjectOfType<ViscaControlPanelController>()?.gameObject;
+            viscaPanelController = viscaPanelObj?.GetComponent<ViscaControlPanelController>();
+        }
+        if (viscaPanelController != null)
+        {
+            viscaPanelVisible = !viscaPanelVisible;
+            viscaPanelController.SlidePanel(viscaPanelVisible, false);
+        }
     }
 } 
