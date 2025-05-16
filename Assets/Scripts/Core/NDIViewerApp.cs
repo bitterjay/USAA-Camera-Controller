@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Klak.Ndi;
 using System.Linq;
 using UnityEngine.EventSystems;
+using System.Reflection;
 
 /// <summary>
 /// Main application controller for the NDI Viewer
@@ -51,6 +52,8 @@ public class NDIViewerApp : MonoBehaviour
     private bool isInEditMode = false;
     private CameraInfo selectedCamera = null;
     private bool autoDiscoverFired = false;
+    
+    private Button hamburgerButton;
     
     private void Start()
     {
@@ -181,6 +184,21 @@ public class NDIViewerApp : MonoBehaviour
     
     private void CreateGlobalSettingsButton()
     {
+        // Hamburger button (left of gear)
+        hamburgerButton = UIFactory.CreateIconButton(
+            mainCanvas.transform,
+            null,
+            "≡",
+            new Vector2(1, 1),
+            TextAnchor.MiddleCenter,
+            new Vector2(24, 24)
+        );
+        var hamburgerRT = hamburgerButton.GetComponent<RectTransform>();
+        hamburgerRT.anchoredPosition = new Vector2(-layoutSettings.Padding - 32, -layoutSettings.Padding);
+        hamburgerButton.transform.SetAsLastSibling();
+        hamburgerButton.onClick.AddListener(ShowGridSettingsPopup);
+
+        // Gear/settings button
         var btn = UIFactory.CreateIconButton(
             mainCanvas.transform,
             globalGearIconTexture,
@@ -189,14 +207,27 @@ public class NDIViewerApp : MonoBehaviour
             TextAnchor.MiddleCenter,
             new Vector2(24, 24)
         );
-        
         var rt = btn.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2(-layoutSettings.Padding, -layoutSettings.Padding);
-        
-        // Ensure button is always on top
         btn.transform.SetAsLastSibling();
-        
         btn.onClick.AddListener(ToggleSettingsPanel);
+    }
+    
+    private void ShowGridSettingsPopup()
+    {
+        GridSettingsPopup.Show(
+            mainCanvas.transform,
+            layoutSettings.ManualColumns,
+            layoutSettings.ManualRows,
+            layoutSettings.ManualCellWidth,
+            (cols, rows, cellWidth) => {
+                typeof(LayoutSettings).GetField("manualColumns", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, cols);
+                typeof(LayoutSettings).GetField("manualRows", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, rows);
+                typeof(LayoutSettings).GetField("manualCellWidth", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(layoutSettings, cellWidth);
+                if (gridController != null && cameraRegistry != null)
+                    gridController.ConfigureLayout(cameraRegistry.Cameras.Count);
+            }
+        );
     }
     
     #endregion

@@ -46,14 +46,14 @@
       <ui:VisualElement class="focus-panel panel">
       <ui:Label text="Focus Controls" class="section-title"/>
         <ui:VisualElement name="focusNearVE" class="pt-btn">
-          <ui:Label text="Focus Near"/>
+          <ui:Label text="Near"/>
         </ui:VisualElement>
         <ui:VisualElement name="focusFarVE" class="pt-btn">
-          <ui:Label text="Focus Far"/>
+          <ui:Label text="Far"/>
         </ui:VisualElement>
-        <ui:Button name="focusAutoButton" text="Auto Focus" class="pt-btn"/>
-        <ui:Button name="focusManualButton" text="Manual Focus" class="pt-btn"/>
-        <ui:Button name="focusOnePushButton" text="One Push Auto Focus" class="pt-btn"/>
+        <ui:Button name="focusAutoButton" text="Auto" class="pt-btn"/>
+        <ui:Button name="focusManualButton" text="Manual" class="pt-btn"/>
+        <ui:Button name="focusOnePushButton" text="One Push" class="pt-btn"/>
       </ui:VisualElement>
       
       <!-- White Balance Section -->

@@ -9,6 +9,9 @@ public class GamepadCameraCycler : MonoBehaviour
     private Vector2 lastMoveDirection = Vector2.zero;
     private bool isMoving = false;
     private const float DEADZONE = 0.3f;
+    private Vector2 lastZoomDirection = Vector2.zero;
+    private bool isZooming = false;
+    private const float ZOOM_DEADZONE = 0.3f;
 
     private void Awake()
     {
@@ -21,6 +24,10 @@ public class GamepadCameraCycler : MonoBehaviour
       
         inputActions.GameController.selectLeftCamera.performed += OnSelectLeftCamera;
         inputActions.GameController.selectRightCamera.performed += OnSelectRightCamera;
+        inputActions.GameController.SavePreset.performed += OnSavePreset;
+        inputActions.GameController.focusOnePush.performed += OnFocusOnePush;
+        inputActions.GameController.whiteBalanceOnePush.performed += OnWhiteBalanceOnePush;
+        inputActions.GameController.showControls.performed += OnShowControls;
 
         // Get the CameraRegistry instance from the NDIViewerApp
         cameraRegistry = FindObjectOfType<NDIViewerApp>()?.GetCameraRegistry();
@@ -31,6 +38,10 @@ public class GamepadCameraCycler : MonoBehaviour
     {
         inputActions.GameController.selectLeftCamera.performed -= OnSelectLeftCamera;
         inputActions.GameController.selectRightCamera.performed -= OnSelectRightCamera;
+        inputActions.GameController.SavePreset.performed -= OnSavePreset;
+        inputActions.GameController.focusOnePush.performed -= OnFocusOnePush;
+        inputActions.GameController.whiteBalanceOnePush.performed -= OnWhiteBalanceOnePush;
+        inputActions.GameController.showControls.performed -= OnShowControls;
         inputActions.Disable();
     }
 
@@ -44,11 +55,53 @@ public class GamepadCameraCycler : MonoBehaviour
         CycleCamera(1);
     }
 
+    private void OnSavePreset(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        if (cameraRegistry == null || cameraRegistry.ActiveCamera == null)
+            return;
+        // Ensure overlay exists
+        if (CameraFullscreenOverlay.Instance == null)
+        {
+            var go = new GameObject("CameraFullscreenOverlay");
+            go.AddComponent<CameraFullscreenOverlay>();
+        }
+        CameraFullscreenOverlay.Instance.Toggle(cameraRegistry.ActiveCamera);
+    }
+
+    private void OnFocusOnePush(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        viscaController?.FocusOnePush();
+    }
+
+    private void OnWhiteBalanceOnePush(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        viscaController?.WhiteBalanceOnePush();
+    }
+
+    private void OnShowControls(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
+    {
+        Debug.Log("ShowControls triggered");
+        if (ControlsOverlay.Instance == null)
+        {
+            var go = new GameObject("ControlsOverlay");
+            go.AddComponent<ControlsOverlay>();
+        }
+        ControlsOverlay.Instance.Toggle();
+    }
+
     private void Update()
     {
         if (viscaController == null)
             viscaController = FindObjectOfType<ViscaControlPanelController>();
 
+        // Determine speed based on right trigger
+        float augment = inputActions.GameController.augmentSpeed.ReadValue<float>();
+        bool fast = augment > 0.5f;
+        byte panSpeed = fast ? ViscaCommands.MAX_PAN_SPEED : ViscaCommands.DEFAULT_PAN_SPEED;
+        byte tiltSpeed = fast ? ViscaCommands.MAX_PAN_SPEED : ViscaCommands.DEFAULT_PAN_SPEED;
+        byte zoomSpeed = fast ? ViscaCommands.MAX_ZOOM_SPEED : ViscaCommands.DEFAULT_ZOOM_SPEED;
+
+        // Left stick: PTZ
         Vector2 move = inputActions.GameController.moveCamera.ReadValue<Vector2>();
         if (move.magnitude > DEADZONE)
         {
@@ -59,22 +112,22 @@ public class GamepadCameraCycler : MonoBehaviour
                 isMoving = true;
                 // Diagonal
                 if (direction.x < 0 && direction.y > 0)
-                    viscaController?.PanTiltUpLeft();
+                    viscaController?.PanTiltUpLeft(panSpeed, tiltSpeed);
                 else if (direction.x > 0 && direction.y > 0)
-                    viscaController?.PanTiltUpRight();
+                    viscaController?.PanTiltUpRight(panSpeed, tiltSpeed);
                 else if (direction.x < 0 && direction.y < 0)
-                    viscaController?.PanTiltDownLeft();
+                    viscaController?.PanTiltDownLeft(panSpeed, tiltSpeed);
                 else if (direction.x > 0 && direction.y < 0)
-                    viscaController?.PanTiltDownRight();
+                    viscaController?.PanTiltDownRight(panSpeed, tiltSpeed);
                 // Cardinal
                 else if (direction.x < 0)
-                    viscaController?.PanLeft();
+                    viscaController?.PanLeft(panSpeed);
                 else if (direction.x > 0)
-                    viscaController?.PanRight();
+                    viscaController?.PanRight(panSpeed);
                 else if (direction.y > 0)
-                    viscaController?.TiltUp();
+                    viscaController?.TiltUp(tiltSpeed);
                 else if (direction.y < 0)
-                    viscaController?.TiltDown();
+                    viscaController?.TiltDown(tiltSpeed);
             }
         }
         else if (isMoving)
@@ -82,6 +135,29 @@ public class GamepadCameraCycler : MonoBehaviour
             isMoving = false;
             lastMoveDirection = Vector2.zero;
             viscaController?.Stop();
+        }
+
+        // Right stick: Zoom
+        Vector2 zoom = inputActions.GameController.zoomCamera.ReadValue<Vector2>();
+        float zoomY = zoom.y;
+        if (Mathf.Abs(zoomY) > ZOOM_DEADZONE)
+        {
+            Vector2 zoomDirection = new Vector2(0, Mathf.Sign(zoomY));
+            if (zoomDirection != lastZoomDirection)
+            {
+                lastZoomDirection = zoomDirection;
+                isZooming = true;
+                if (zoomY > 0)
+                    viscaController?.ZoomIn(zoomSpeed);
+                else if (zoomY < 0)
+                    viscaController?.ZoomOut(zoomSpeed);
+            }
+        }
+        else if (isZooming)
+        {
+            isZooming = false;
+            lastZoomDirection = Vector2.zero;
+            viscaController?.ZoomStop();
         }
     }
 

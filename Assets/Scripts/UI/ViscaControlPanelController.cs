@@ -1133,15 +1133,20 @@ public class ViscaControlPanelController : MonoBehaviour
     }
 
     // Public PTZ control methods for gamepad support
-    public async void PanLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanLeft(); }
-    public async void PanRight() { if (isInitialized && viscaSender != null) await viscaSender.PanRight(); }
-    public async void TiltUp() { if (isInitialized && viscaSender != null) await viscaSender.TiltUp(); }
-    public async void TiltDown() { if (isInitialized && viscaSender != null) await viscaSender.TiltDown(); }
-    public async void PanTiltUpLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpLeft(); }
-    public async void PanTiltUpRight() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpRight(); }
-    public async void PanTiltDownLeft() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownLeft(); }
-    public async void PanTiltDownRight() { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownRight(); }
+    public async void PanLeft(byte speed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanLeft(speed); }
+    public async void PanRight(byte speed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanRight(speed); }
+    public async void TiltUp(byte speed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.TiltUp(speed); }
+    public async void TiltDown(byte speed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.TiltDown(speed); }
+    public async void PanTiltUpLeft(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpLeft(panSpeed, tiltSpeed); }
+    public async void PanTiltUpRight(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanTiltUpRight(panSpeed, tiltSpeed); }
+    public async void PanTiltDownLeft(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownLeft(panSpeed, tiltSpeed); }
+    public async void PanTiltDownRight(byte panSpeed = ViscaCommands.DEFAULT_PAN_SPEED, byte tiltSpeed = ViscaCommands.DEFAULT_PAN_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.PanTiltDownRight(panSpeed, tiltSpeed); }
     public async void Stop() { if (isInitialized && viscaSender != null) await viscaSender.Stop(); }
+    public async void ZoomIn(byte speed = ViscaCommands.DEFAULT_ZOOM_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.ZoomIn(speed); }
+    public async void ZoomOut(byte speed = ViscaCommands.DEFAULT_ZOOM_SPEED) { if (isInitialized && viscaSender != null) await viscaSender.ZoomOut(speed); }
+    public async void ZoomStop() { if (isInitialized && viscaSender != null) await viscaSender.ZoomStop(); }
+    public async void FocusOnePush() { if (isInitialized && viscaSender != null) await viscaSender.FocusOnePush(); }
+    public async void WhiteBalanceOnePush() { if (isInitialized && viscaSender != null) await viscaSender.WhiteBalanceOnePush(); }
 }
 
 public static class TaskExtensions

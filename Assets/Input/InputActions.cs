@@ -89,6 +89,42 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""augmentSpeed"",
+                    ""type"": ""Value"",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000001"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""focusOnePush"",
+                    ""type"": ""Button"",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000003"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""whiteBalanceOnePush"",
+                    ""type"": ""Button"",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000004"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""showControls"",
+                    ""type"": ""Button"",
+                    ""id"": ""c63c0cf9-21af-47d4-ad75-05bb2dcee5b4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -201,6 +237,39 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
                     ""action"": ""movePresets"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b1e1c1a2-0000-4000-8000-000000000002"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""augmentSpeed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""17812611-3a68-463b-a88b-a5e96e3b775d"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""whiteBalanceOnePush"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""daee5ea4-4bba-4cec-9bbb-46b46f000353"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""showControls"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -216,6 +285,10 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         m_GameController_zoomCamera = m_GameController.FindAction("zoomCamera", throwIfNotFound: true);
         m_GameController_SavePreset = m_GameController.FindAction("Save Preset", throwIfNotFound: true);
         m_GameController_ExecutePreset = m_GameController.FindAction("Execute Preset", throwIfNotFound: true);
+        m_GameController_augmentSpeed = m_GameController.FindAction("augmentSpeed", throwIfNotFound: true);
+        m_GameController_focusOnePush = m_GameController.FindAction("focusOnePush", throwIfNotFound: true);
+        m_GameController_whiteBalanceOnePush = m_GameController.FindAction("whiteBalanceOnePush", throwIfNotFound: true);
+        m_GameController_showControls = m_GameController.FindAction("showControls", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -284,6 +357,10 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_GameController_zoomCamera;
     private readonly InputAction m_GameController_SavePreset;
     private readonly InputAction m_GameController_ExecutePreset;
+    private readonly InputAction m_GameController_augmentSpeed;
+    private readonly InputAction m_GameController_focusOnePush;
+    private readonly InputAction m_GameController_whiteBalanceOnePush;
+    private readonly InputAction m_GameController_showControls;
     public struct GameControllerActions
     {
         private @InputActions m_Wrapper;
@@ -295,6 +372,10 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         public InputAction @zoomCamera => m_Wrapper.m_GameController_zoomCamera;
         public InputAction @SavePreset => m_Wrapper.m_GameController_SavePreset;
         public InputAction @ExecutePreset => m_Wrapper.m_GameController_ExecutePreset;
+        public InputAction @augmentSpeed => m_Wrapper.m_GameController_augmentSpeed;
+        public InputAction @focusOnePush => m_Wrapper.m_GameController_focusOnePush;
+        public InputAction @whiteBalanceOnePush => m_Wrapper.m_GameController_whiteBalanceOnePush;
+        public InputAction @showControls => m_Wrapper.m_GameController_showControls;
         public InputActionMap Get() { return m_Wrapper.m_GameController; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -325,6 +406,18 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @ExecutePreset.started += instance.OnExecutePreset;
             @ExecutePreset.performed += instance.OnExecutePreset;
             @ExecutePreset.canceled += instance.OnExecutePreset;
+            @augmentSpeed.started += instance.OnAugmentSpeed;
+            @augmentSpeed.performed += instance.OnAugmentSpeed;
+            @augmentSpeed.canceled += instance.OnAugmentSpeed;
+            @focusOnePush.started += instance.OnFocusOnePush;
+            @focusOnePush.performed += instance.OnFocusOnePush;
+            @focusOnePush.canceled += instance.OnFocusOnePush;
+            @whiteBalanceOnePush.started += instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.performed += instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.canceled += instance.OnWhiteBalanceOnePush;
+            @showControls.started += instance.OnShowControls;
+            @showControls.performed += instance.OnShowControls;
+            @showControls.canceled += instance.OnShowControls;
         }
 
         private void UnregisterCallbacks(IGameControllerActions instance)
@@ -350,6 +443,18 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
             @ExecutePreset.started -= instance.OnExecutePreset;
             @ExecutePreset.performed -= instance.OnExecutePreset;
             @ExecutePreset.canceled -= instance.OnExecutePreset;
+            @augmentSpeed.started -= instance.OnAugmentSpeed;
+            @augmentSpeed.performed -= instance.OnAugmentSpeed;
+            @augmentSpeed.canceled -= instance.OnAugmentSpeed;
+            @focusOnePush.started -= instance.OnFocusOnePush;
+            @focusOnePush.performed -= instance.OnFocusOnePush;
+            @focusOnePush.canceled -= instance.OnFocusOnePush;
+            @whiteBalanceOnePush.started -= instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.performed -= instance.OnWhiteBalanceOnePush;
+            @whiteBalanceOnePush.canceled -= instance.OnWhiteBalanceOnePush;
+            @showControls.started -= instance.OnShowControls;
+            @showControls.performed -= instance.OnShowControls;
+            @showControls.canceled -= instance.OnShowControls;
         }
 
         public void RemoveCallbacks(IGameControllerActions instance)
@@ -376,5 +481,9 @@ public partial class @InputActions: IInputActionCollection2, IDisposable
         void OnZoomCamera(InputAction.CallbackContext context);
         void OnSavePreset(InputAction.CallbackContext context);
         void OnExecutePreset(InputAction.CallbackContext context);
+        void OnAugmentSpeed(InputAction.CallbackContext context);
+        void OnFocusOnePush(InputAction.CallbackContext context);
+        void OnWhiteBalanceOnePush(InputAction.CallbackContext context);
+        void OnShowControls(InputAction.CallbackContext context);
     }
 }
